@@ -102,7 +102,7 @@ public class Tank {
 
         // Check if the new position is valid (no collision with walls)
         if (canMoveTo(newX, newY, tileSize, mapData)) {
-            playerX = newX;  // Update player position smoothly
+            playerX = newX;
             playerY = newY;
         }
     }
