@@ -10,7 +10,7 @@ public class GameForm extends JFrame {
 
     public GameForm() {
         super("Tank Trouble");  // Set the window title
-        player = new Tank(TankColor.Black);
+        player = new Tank(TankColor.Red);
 
         setSize(800, 600);  // Set initial size for the frame
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

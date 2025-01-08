@@ -46,8 +46,8 @@ public class Tank {
     }
 
     public void paintTank(Graphics g) {
-        int bodyWidth = 100;
-        int bodyHeight = 150;
+        int bodyWidth = 50;
+        int bodyHeight = 75;
 
         Point[] bodyPoints = {
                 new Point((int) (playerX + playerDeltaY * (bodyWidth / 2) - playerDeltaX * bodyHeight / 2),
@@ -63,8 +63,8 @@ public class Tank {
         g.fillPolygon(new int[] { bodyPoints[0].x, bodyPoints[1].x, bodyPoints[2].x, bodyPoints[3].x },
                 new int[] { bodyPoints[0].y, bodyPoints[1].y, bodyPoints[2].y, bodyPoints[3].y }, 4);
 
-        int barrelWidth = 40;
-        int barrelLength = 70;
+        int barrelWidth = 20;
+        int barrelLength = 35;
         Point[] barrelPoints = {
                 new Point((int) (playerX + playerDeltaY * (barrelWidth / 2)), (int) (playerY - playerDeltaX * (barrelWidth / 2))),
                 new Point((int) (playerX - playerDeltaY * (barrelWidth / 2)), (int) (playerY + playerDeltaX * (barrelWidth / 2))),
