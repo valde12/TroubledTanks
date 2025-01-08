@@ -6,7 +6,7 @@ import java.util.List;
 public class Board {
 
     private final List<List<Integer>> mapData;
-    private final int tileSize = 175;
+    private int tileSize;
 
     public Board(Maps map) {
         this.mapData = csvTo2DArray(map.getFilePath());
@@ -40,7 +40,7 @@ public class Board {
             return;
         }
 
-        int tileSize = Math.min(panelWidth / cols, panelHeight / rows); // Calculate tile size to fit map
+        tileSize = Math.min(panelWidth / cols, panelHeight / rows); // Calculate tile size to fit map
 
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
@@ -59,5 +59,13 @@ public class Board {
         g.fillRect(x, y, tileSize, tileSize);
         g.setColor(Color.BLACK);
         g.drawRect(x, y, tileSize, tileSize);
+    }
+
+    public List<List<Integer>> getMapData() {
+        return mapData;
+    }
+
+    public int getTileSize() {
+        return tileSize;
     }
 }
