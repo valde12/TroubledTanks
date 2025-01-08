@@ -45,9 +45,16 @@ public class Tank {
         }
     }
 
-    public void paintTank(Graphics g) {
-        int bodyWidth = 50;
-        int bodyHeight = 75;
+    public void paintTank(Graphics g, int panelWidth, int panelHeight) {
+        // Get the smallest of the two dimensions (width and height)
+        int minDimension = Math.min(panelWidth, panelHeight);
+
+        // Scale all sizes based on the minDimension
+        int bodyWidth = minDimension / 45;
+        int bodyHeight = minDimension / 35;
+        int barrelWidth = minDimension / 100;
+        int barrelLength = minDimension / 55;
+        playerSpeed = minDimension / 170;
 
         Point[] bodyPoints = {
                 new Point((int) (playerX + playerDeltaY * (bodyWidth / 2) - playerDeltaX * bodyHeight / 2),
@@ -63,8 +70,6 @@ public class Tank {
         g.fillPolygon(new int[] { bodyPoints[0].x, bodyPoints[1].x, bodyPoints[2].x, bodyPoints[3].x },
                 new int[] { bodyPoints[0].y, bodyPoints[1].y, bodyPoints[2].y, bodyPoints[3].y }, 4);
 
-        int barrelWidth = 20;
-        int barrelLength = 35;
         Point[] barrelPoints = {
                 new Point((int) (playerX + playerDeltaY * (barrelWidth / 2)), (int) (playerY - playerDeltaX * (barrelWidth / 2))),
                 new Point((int) (playerX - playerDeltaY * (barrelWidth / 2)), (int) (playerY + playerDeltaX * (barrelWidth / 2))),

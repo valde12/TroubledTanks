@@ -7,10 +7,13 @@ import java.util.TimerTask;
 public class GameForm extends JFrame {
     private Timer timer;
     private Tank player;
+    private Board board;
 
     public GameForm() {
         super("Tank Trouble");  // Set the window title
+
         player = new Tank(TankColor.Red);
+        board = new Board(Maps.MAP1);
 
         setSize(800, 600);  // Set initial size for the frame
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -48,7 +51,8 @@ public class GameForm extends JFrame {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                player.paintTank(g);
+                board.paintMap(g, getWidth(), getHeight());
+                player.paintTank(g, getWidth(), getHeight());
             }
         };
         add(gamePanel);
