@@ -105,8 +105,28 @@ public class Tank {
             playerY = newY;
         } else if (canMoveX) {
             playerX = newX;
+            // Turn away from direction of wall so gets pressed against wall
+            if(playerDeltaX < 0 && playerDeltaY > 0) {
+                turnPlayer(-2f, tileSize, mapData);
+            } else if (playerDeltaX > 0 && playerDeltaY > 0) {
+                turnPlayer(2f, tileSize, mapData);
+            } else if (playerDeltaX < 0 && playerDeltaY < 0) {
+                turnPlayer(2f, tileSize, mapData);
+            } else if (playerDeltaX > 0 && playerDeltaY < 0) {
+                turnPlayer(-2f, tileSize, mapData);
+            }
         } else if (canMoveY) {
             playerY = newY;
+            // Turn away from direction of wall so gets pressed against wall
+            if(playerDeltaX < 0 && playerDeltaY > 0) {
+                turnPlayer(2f, tileSize, mapData);
+            } else if (playerDeltaX > 0 && playerDeltaY > 0) {
+                turnPlayer(-2f, tileSize, mapData);
+            } else if (playerDeltaX < 0 && playerDeltaY < 0) {
+                turnPlayer(-2f, tileSize, mapData);
+            } else if (playerDeltaX > 0 && playerDeltaY < 0) {
+                turnPlayer(2f, tileSize, mapData);
+            }
         }
     }
 
@@ -121,7 +141,22 @@ public class Tank {
             playerAngle = newAngle;
             playerDeltaX = newDeltaX;
             playerDeltaY = newDeltaY;
+        } else {
+            // Push away from wall, if right up against it when turning
+            if (canMoveTo(playerX, playerY, playerDeltaX, newDeltaY, tileSize, mapData)
+                    || canMoveTo(playerX, playerY, newDeltaX, playerDeltaY, tileSize, mapData)) {
+                if (newDeltaX > 0 && newDeltaY > 0) {
+                    movePlayer(-newDeltaY, tileSize, mapData);
+                } else if (newDeltaX > 0 && newDeltaY < 0) {
+                    movePlayer(newDeltaY, tileSize, mapData);
+                } else if (newDeltaX < 0 && newDeltaY < 0) {
+                    movePlayer(newDeltaY, tileSize, mapData);
+                } else if (newDeltaX < 0 && newDeltaY > 0) {
+                    movePlayer(-newDeltaY, tileSize, mapData);
+                }
+            }
         }
+
     }
 
     private boolean canMoveTo(float newX, float newY, float newPlayerDeltaX, float newPlayerDeltaY, int tileSize, List<List<Integer>> mapData) {
