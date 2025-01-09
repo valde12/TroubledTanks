@@ -35,7 +35,7 @@ public class Board {
 
     public void paintMap(Graphics g, int panelWidth, int panelHeight) {
         int rows = mapData.size();
-        int cols = rows > 0 ? mapData.get(0).size() : 0; //Amount of columns in map
+        int cols = rows > 0 ? mapData.get(0).size() : 0;
         if (rows == 0 || cols == 0) {
             return;
         }

@@ -15,6 +15,7 @@ public class Tank {
     private float playerDeltaY = 0f;
     private int playerSpeed = 15;
     private int bodyWidth, bodyHeight, barrelWidth, barrelLength;
+    private int currentTileSize = 0;
 
     private HashSet<Integer> keyStates = new HashSet<>();  // Track key presses
 
@@ -47,16 +48,20 @@ public class Tank {
         }
     }
 
-    public void paintTank(Graphics g, int panelWidth, int panelHeight) {
-        // Get the smallest of the two dimensions (width and height)
-        int minDimension = Math.min(panelWidth, panelHeight);
+    public void paintTank(Graphics g, int tileSize) {
+        if (currentTileSize == 0) {
+            currentTileSize = tileSize;
+        }
+        // Scale all sizes based on the tile size
+        bodyWidth = tileSize / 3;
+        bodyHeight = tileSize / 2;
+        barrelWidth = tileSize / 8;
+        barrelLength = tileSize / 4;
+        playerSpeed = tileSize / 12;
+        playerX = (playerX / currentTileSize) * tileSize;
+        playerY = (playerY / currentTileSize) * tileSize;
+        currentTileSize = tileSize;
 
-        // Scale all sizes based on the minDimension
-        bodyWidth = minDimension / 45;
-        bodyHeight = minDimension / 35;
-        barrelWidth = minDimension / 100;
-        barrelLength = minDimension / 55;
-        playerSpeed = minDimension / 170;
 
         Point[] bodyPoints = calculateBodyPoints(playerX, playerY, playerDeltaX, playerDeltaY);
 
@@ -91,10 +96,10 @@ public class Tank {
         float newX = playerX + playerDeltaX * direction;
         float newY = playerY + playerDeltaY * direction;
 
-        boolean canMoveX = canMoveTo(newX, playerY, tileSize, mapData);
-        boolean canMoveY = canMoveTo(playerX, newY, tileSize, mapData);
+        boolean canMoveX = canMoveTo(newX, playerY, playerDeltaX, playerDeltaY, tileSize, mapData);
+        boolean canMoveY = canMoveTo(playerX, newY, playerDeltaX, playerDeltaY, tileSize, mapData);
 
-        // Wall sliding logic: If full diagonal movement is not possible, try to move along X and Y independently
+        // Wall sliding logic
         if (canMoveX && canMoveY) {
             playerX = newX;
             playerY = newY;
@@ -105,15 +110,26 @@ public class Tank {
         }
     }
 
-    private boolean canMoveTo(float newX, float newY, int tileSize, List<List<Integer>> mapData) {
+    private void turnPlayer(float angleChange, int tileSize, List<List<Integer>> mapData) {
+        float newAngle = fixAngle(playerAngle + angleChange);
+        float newDeltaX = (float) Math.cos(Math.toRadians(newAngle));
+        float newDeltaY = (float) -Math.sin(Math.toRadians(newAngle));
+
+        boolean canRotate = canMoveTo(playerX, playerY, newDeltaX, newDeltaY, tileSize, mapData);
+
+        if (canRotate) {
+            playerAngle = newAngle;
+            playerDeltaX = newDeltaX;
+            playerDeltaY = newDeltaY;
+        }
+    }
+
+    private boolean canMoveTo(float newX, float newY, float newPlayerDeltaX, float newPlayerDeltaY, int tileSize, List<List<Integer>> mapData) {
         int rows = mapData.size();
         int cols = rows > 0 ? mapData.get(0).size() : 0;
 
-        // Dynamically compute the new body points based on the newX and newY
-        Point[] newBodyPoints = calculateBodyPoints(newX, newY, playerDeltaX, playerDeltaY);
-
-        // Dynamically compute new barrel points
-        Point[] newBarrelPoints = calculateBarrelPoints(newX, newY, playerDeltaX, playerDeltaY);
+        Point[] newBodyPoints = calculateBodyPoints(newX, newY, newPlayerDeltaX, newPlayerDeltaY);
+        Point[] newBarrelPoints = calculateBarrelPoints(newX, newY, newPlayerDeltaX, newPlayerDeltaY);
 
         // Check body collision
         for (Point point : newBodyPoints) {
@@ -135,43 +151,12 @@ public class Tank {
         int tileX = x / tileSize;
         int tileY = y / tileSize;
 
-        // Out of bounds check with buffer for sliding responsiveness
+        // Out of bounds check
         if (tileX < 0 || tileX >= cols || tileY < 0 || tileY >= rows) {
             return false;
         }
 
-        // Wall tile check with a buffer of 2 pixels (tweak as needed)
         return mapData.get(tileY).get(tileX) != 1;
-    }
-
-    private void turnPlayer(float angleChange, int tileSize, List<List<Integer>> mapData) {
-        float newAngle = fixAngle(playerAngle + angleChange);
-        float newDeltaX = (float) Math.cos(Math.toRadians(newAngle));
-        float newDeltaY = (float) -Math.sin(Math.toRadians(newAngle));
-
-        // Calculate new body points as if the tank was rotated
-        Point[] rotatedBodyPoints = calculateBodyPoints(playerX, playerY, newDeltaX, newDeltaY);
-        Point[] rotatedBarrelPoints = calculateBarrelPoints(playerX, playerY, newDeltaX, newDeltaY);
-
-        boolean canRotate = true;
-        for (Point point : rotatedBodyPoints) {
-            if (!canTileBePassed(point.x, point.y, tileSize, mapData.size(), mapData.get(0).size(), mapData)) {
-                canRotate = false;
-                break;
-            }
-        }
-
-        if (!canTileBePassed(rotatedBarrelPoints[2].x, rotatedBarrelPoints[2].y, tileSize, mapData.size(), mapData.get(0).size(), mapData) ||
-                !canTileBePassed(rotatedBarrelPoints[3].x, rotatedBarrelPoints[3].y, tileSize, mapData.size(), mapData.get(0).size(), mapData)) {
-            canRotate = false;
-        }
-
-        // Apply the rotation only if it's allowed
-        if (canRotate) {
-            playerAngle = newAngle;
-            playerDeltaX = newDeltaX;
-            playerDeltaY = newDeltaY;
-        }
     }
 
     private float fixAngle(float angle) {

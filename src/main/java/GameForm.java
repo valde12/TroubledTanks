@@ -52,7 +52,7 @@ public class GameForm extends JFrame {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 board.paintMap(g, getWidth(), getHeight());
-                player.paintTank(g, getWidth(), getHeight());
+                player.paintTank(g, board.getTileSize());
             }
         };
         add(gamePanel);
