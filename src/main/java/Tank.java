@@ -14,7 +14,7 @@ public class Tank {
     private float playerDeltaX = 1f;
     private float playerDeltaY = 0f;
     private int playerSpeed = 15;
-    private int bodyWidth, bodyHeight;
+    private int bodyWidth, bodyHeight, barrelWidth, barrelLength;
 
     private HashSet<Integer> keyStates = new HashSet<>();  // Track key presses
 
@@ -54,81 +54,29 @@ public class Tank {
         // Scale all sizes based on the minDimension
         bodyWidth = minDimension / 45;
         bodyHeight = minDimension / 35;
-        int barrelWidth = minDimension / 100;
-        int barrelLength = minDimension / 55;
+        barrelWidth = minDimension / 100;
+        barrelLength = minDimension / 55;
         playerSpeed = minDimension / 170;
 
-        Point[] bodyPoints = {
-                new Point((int) (playerX + playerDeltaY * (bodyWidth / 2) - playerDeltaX * bodyHeight / 2),
-                        (int) (playerY - playerDeltaX * (bodyWidth / 2) - playerDeltaY * bodyHeight / 2)),
-                new Point((int) (playerX - playerDeltaY * (bodyWidth / 2) - playerDeltaX * bodyHeight / 2),
-                        (int) (playerY + playerDeltaX * (bodyWidth / 2) - playerDeltaY * bodyHeight / 2)),
-                new Point((int) (playerX - playerDeltaY * (bodyWidth / 2) + playerDeltaX * bodyHeight / 2),
-                        (int) (playerY + playerDeltaX * (bodyWidth / 2) + playerDeltaY * bodyHeight / 2)),
-                new Point((int) (playerX + playerDeltaY * (bodyWidth / 2) + playerDeltaX * bodyHeight / 2),
-                        (int) (playerY - playerDeltaX * (bodyWidth / 2) + playerDeltaY * bodyHeight / 2))
-        };
+        Point[] bodyPoints = calculateBodyPoints(playerX, playerY, playerDeltaX, playerDeltaY);
 
         g.setColor(bodyColor);
         g.fillPolygon(new int[] { bodyPoints[0].x, bodyPoints[1].x, bodyPoints[2].x, bodyPoints[3].x },
                 new int[] { bodyPoints[0].y, bodyPoints[1].y, bodyPoints[2].y, bodyPoints[3].y }, 4);
 
         // Barrel Points
-        Point[] barrelPoints = {
-                new Point((int) (playerX + playerDeltaY * (barrelWidth / 2)), (int) (playerY - playerDeltaX * (barrelWidth / 2))),
-                new Point((int) (playerX - playerDeltaY * (barrelWidth / 2)), (int) (playerY + playerDeltaX * (barrelWidth / 2))),
-                new Point((int) (playerX + playerDeltaX * (bodyHeight / 2 + barrelLength) - playerDeltaY * (barrelWidth / 2)),
-                        (int) (playerY + playerDeltaY * (bodyHeight / 2 + barrelLength) + playerDeltaX * (barrelWidth / 2))),
-                new Point((int) (playerX + playerDeltaX * (bodyHeight / 2 + barrelLength) + playerDeltaY * (barrelWidth / 2)),
-                        (int) (playerY + playerDeltaY * (bodyHeight / 2 + barrelLength) - playerDeltaX * (barrelWidth / 2)))
-        };
+        Point[] barrelPoints = calculateBarrelPoints(playerX, playerY, playerDeltaX, playerDeltaY);
 
         g.setColor(barrelColor);
         g.fillPolygon(new int[] { barrelPoints[0].x, barrelPoints[1].x, barrelPoints[2].x, barrelPoints[3].x },
                 new int[] { barrelPoints[0].y, barrelPoints[1].y, barrelPoints[2].y, barrelPoints[3].y }, 4);
     }
 
-    public void checkKeys(List<List<Integer>> mapData, int tileSize) {
+    public void keystateCheck(List<List<Integer>> mapData, int tileSize) {
         if (keyStates.contains(KeyEvent.VK_W)) movePlayer(playerSpeed, tileSize, mapData);
         if (keyStates.contains(KeyEvent.VK_S)) movePlayer(-playerSpeed, tileSize, mapData);
-        if (keyStates.contains(KeyEvent.VK_A)) turnPlayer(5);
-        if (keyStates.contains(KeyEvent.VK_D)) turnPlayer(-5);
-    }
-
-    private void movePlayer(float direction, int tileSize, List<List<Integer>> mapData) {
-        // Calculate new position using delta values
-        float newX = playerX + playerDeltaX * direction;
-        float newY = playerY + playerDeltaY * direction;
-
-        // Check if the new position is valid (no collision with walls)
-        if (canMoveTo(newX, newY, tileSize, mapData)) {
-            playerX = newX;
-            playerY = newY;
-        }
-    }
-
-    private boolean canMoveTo(float newX, float newY, int tileSize, List<List<Integer>> mapData) {
-        int rows = mapData.size();
-        int cols = rows > 0 ? mapData.get(0).size() : 0;
-
-        // Check the new position with tile boundaries
-        int tileX = (int) (newX / tileSize);
-        int tileY = (int) (newY / tileSize);
-
-        // Out-of-bounds check
-        if (tileX < 0 || tileX >= cols || tileY < 0 || tileY >= rows) {
-            return false;
-        }
-
-        // Check for wall collisions (assuming 1 means a wall)
-        return mapData.get(tileY).get(tileX) != 1;
-    }
-
-    private void turnPlayer(float angleChange) {
-        playerAngle += angleChange;
-        playerAngle = fixAngle(playerAngle);
-        playerDeltaX = (float) Math.cos(Math.toRadians(playerAngle));
-        playerDeltaY = (float) -Math.sin(Math.toRadians(playerAngle));
+        if (keyStates.contains(KeyEvent.VK_A)) turnPlayer(5f, tileSize, mapData);
+        if (keyStates.contains(KeyEvent.VK_D)) turnPlayer(-5f, tileSize, mapData);
     }
 
     public void keyDown(KeyEvent e) {
@@ -139,9 +87,123 @@ public class Tank {
         keyStates.remove(e.getKeyCode());
     }
 
+    private void movePlayer(float direction, int tileSize, List<List<Integer>> mapData) {
+        float newX = playerX + playerDeltaX * direction;
+        float newY = playerY + playerDeltaY * direction;
+
+        boolean canMoveX = canMoveTo(newX, playerY, tileSize, mapData);
+        boolean canMoveY = canMoveTo(playerX, newY, tileSize, mapData);
+
+        // Wall sliding logic: If full diagonal movement is not possible, try to move along X and Y independently
+        if (canMoveX && canMoveY) {
+            playerX = newX;
+            playerY = newY;
+        } else if (canMoveX) {
+            playerX = newX;
+        } else if (canMoveY) {
+            playerY = newY;
+        }
+    }
+
+    private boolean canMoveTo(float newX, float newY, int tileSize, List<List<Integer>> mapData) {
+        int rows = mapData.size();
+        int cols = rows > 0 ? mapData.get(0).size() : 0;
+
+        // Dynamically compute the new body points based on the newX and newY
+        Point[] newBodyPoints = calculateBodyPoints(newX, newY, playerDeltaX, playerDeltaY);
+
+        // Dynamically compute new barrel points
+        Point[] newBarrelPoints = calculateBarrelPoints(newX, newY, playerDeltaX, playerDeltaY);
+
+        // Check body collision
+        for (Point point : newBodyPoints) {
+            if (!canTileBePassed(point.x, point.y, tileSize, rows, cols, mapData)) {
+                return false;
+            }
+        }
+
+        // Check barrel collision
+        if (!canTileBePassed(newBarrelPoints[2].x, newBarrelPoints[2].y, tileSize, rows, cols, mapData) ||
+                !canTileBePassed(newBarrelPoints[3].x, newBarrelPoints[3].y, tileSize, rows, cols, mapData)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean canTileBePassed(int x, int y, int tileSize, int rows, int cols, List<List<Integer>> mapData) {
+        int tileX = x / tileSize;
+        int tileY = y / tileSize;
+
+        // Out of bounds check with buffer for sliding responsiveness
+        if (tileX < 0 || tileX >= cols || tileY < 0 || tileY >= rows) {
+            return false;
+        }
+
+        // Wall tile check with a buffer of 2 pixels (tweak as needed)
+        return mapData.get(tileY).get(tileX) != 1;
+    }
+
+    private void turnPlayer(float angleChange, int tileSize, List<List<Integer>> mapData) {
+        float newAngle = fixAngle(playerAngle + angleChange);
+        float newDeltaX = (float) Math.cos(Math.toRadians(newAngle));
+        float newDeltaY = (float) -Math.sin(Math.toRadians(newAngle));
+
+        // Calculate new body points as if the tank was rotated
+        Point[] rotatedBodyPoints = calculateBodyPoints(playerX, playerY, newDeltaX, newDeltaY);
+        Point[] rotatedBarrelPoints = calculateBarrelPoints(playerX, playerY, newDeltaX, newDeltaY);
+
+        boolean canRotate = true;
+        for (Point point : rotatedBodyPoints) {
+            if (!canTileBePassed(point.x, point.y, tileSize, mapData.size(), mapData.get(0).size(), mapData)) {
+                canRotate = false;
+                break;
+            }
+        }
+
+        if (!canTileBePassed(rotatedBarrelPoints[2].x, rotatedBarrelPoints[2].y, tileSize, mapData.size(), mapData.get(0).size(), mapData) ||
+                !canTileBePassed(rotatedBarrelPoints[3].x, rotatedBarrelPoints[3].y, tileSize, mapData.size(), mapData.get(0).size(), mapData)) {
+            canRotate = false;
+        }
+
+        // Apply the rotation only if it's allowed
+        if (canRotate) {
+            playerAngle = newAngle;
+            playerDeltaX = newDeltaX;
+            playerDeltaY = newDeltaY;
+        }
+    }
+
     private float fixAngle(float angle) {
         if (angle > 359f) return angle - 360f;
         if (angle < 0f) return angle + 360f;
         return angle;
     }
+
+    private Point[] calculateBodyPoints(float playerX, float playerY, float playerDeltaX, float playerDeltaY) {
+        Point[] bodyPoints = new Point[] {
+                new Point((int) (playerX + playerDeltaY * (bodyWidth / 2) - playerDeltaX * bodyHeight / 2),
+                        (int) (playerY - playerDeltaX * (bodyWidth / 2) - playerDeltaY * bodyHeight / 2)),
+                new Point((int) (playerX - playerDeltaY * (bodyWidth / 2) - playerDeltaX * bodyHeight / 2),
+                        (int) (playerY + playerDeltaX * (bodyWidth / 2) - playerDeltaY * bodyHeight / 2)),
+                new Point((int) (playerX - playerDeltaY * (bodyWidth / 2) + playerDeltaX * bodyHeight / 2),
+                        (int) (playerY + playerDeltaX * (bodyWidth / 2) + playerDeltaY * bodyHeight / 2)),
+                new Point((int) (playerX + playerDeltaY * (bodyWidth / 2) + playerDeltaX * bodyHeight / 2),
+                        (int) (playerY - playerDeltaX * (bodyWidth / 2) + playerDeltaY * bodyHeight / 2))
+        };
+        return bodyPoints;
+    }
+
+    private Point[] calculateBarrelPoints(float playerX, float playerY, float playerDeltaX, float playerDeltaY) {
+        Point[] barrelPoints = new Point[] {
+                new Point((int) (playerX + playerDeltaY * (barrelWidth / 2)), (int) (playerY - playerDeltaX * (barrelWidth / 2))),
+                new Point((int) (playerX - playerDeltaY * (barrelWidth / 2)), (int) (playerY + playerDeltaX * (barrelWidth / 2))),
+                new Point((int) (playerX + playerDeltaX * (bodyHeight / 2 + barrelLength) - playerDeltaY * (barrelWidth / 2)),
+                        (int) (playerY + playerDeltaY * (bodyHeight / 2 + barrelLength) + playerDeltaX * (barrelWidth / 2))),
+                new Point((int) (playerX + playerDeltaX * (bodyHeight / 2 + barrelLength) + playerDeltaY * (barrelWidth / 2)),
+                        (int) (playerY + playerDeltaY * (bodyHeight / 2 + barrelLength) - playerDeltaX * (barrelWidth / 2)))
+        };
+        return barrelPoints;
+    }
+
 }

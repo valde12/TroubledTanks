@@ -24,7 +24,7 @@ public class GameForm extends JFrame {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                player.checkKeys(board.getMapData(), board.getTileSize());
+                player.keystateCheck(board.getMapData(), board.getTileSize());
                 repaint();  // Redraw the frame
             }
         }, 0, 16);  // Approx. 60 FPS
