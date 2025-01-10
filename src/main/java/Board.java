@@ -57,7 +57,7 @@ public class Board {
             default -> g.setColor(Color.BLACK); // Unknown tile type
         }
         g.fillRect(x, y, tileSize, tileSize);
-        g.setColor(Color.BLACK);
+        g.setColor(Color.BLACK); // Border
         g.drawRect(x, y, tileSize, tileSize);
     }
 

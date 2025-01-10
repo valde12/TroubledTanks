@@ -21,23 +21,23 @@ public class Tank {
 
     public Tank(TankColor color) {
         switch (color) {
-            case Red: // Red
+            case Red:
                 bodyColor = new Color(139, 0, 0);  // Dark Red
                 barrelColor = Color.RED;
                 break;
-            case Green: // Green
+            case Green:
                 bodyColor = new Color(0, 100, 0);  // Dark Green
                 barrelColor = Color.GREEN;
                 break;
-            case Blue: // Blue
+            case Blue:
                 bodyColor = new Color(0, 0, 139);  // Dark Blue
                 barrelColor = Color.BLUE;
                 break;
-            case Yellow: // Yellow
+            case Yellow:
                 bodyColor = new Color(184, 134, 11);  // Dark Goldenrod
                 barrelColor = new Color(218, 165, 32);  // Goldenrod
                 break;
-            case Black: // Black
+            case Black:
                 bodyColor = Color.BLACK;
                 barrelColor = new Color(169, 169, 169);  // Dark Gray
                 break;
@@ -99,34 +99,17 @@ public class Tank {
         boolean canMoveX = canMoveTo(newX, playerY, playerDeltaX, playerDeltaY, tileSize, mapData);
         boolean canMoveY = canMoveTo(playerX, newY, playerDeltaX, playerDeltaY, tileSize, mapData);
 
-        // Wall sliding logic
         if (canMoveX && canMoveY) {
             playerX = newX;
             playerY = newY;
         } else if (canMoveX) {
             playerX = newX;
-            // Turn away from direction of wall so gets pressed against wall
-            if(playerDeltaX < 0 && playerDeltaY > 0) {
-                turnPlayer(-2f, tileSize, mapData);
-            } else if (playerDeltaX > 0 && playerDeltaY > 0) {
-                turnPlayer(2f, tileSize, mapData);
-            } else if (playerDeltaX < 0 && playerDeltaY < 0) {
-                turnPlayer(2f, tileSize, mapData);
-            } else if (playerDeltaX > 0 && playerDeltaY < 0) {
-                turnPlayer(-2f, tileSize, mapData);
-            }
+            // Turn slightly away from wall when sliding against it
+            turnPlayer(playerDeltaY > 0 ? (playerDeltaX < 0 ? -2f : 2f) : (playerDeltaX < 0 ? 2f : -2f), tileSize, mapData);
         } else if (canMoveY) {
             playerY = newY;
-            // Turn away from direction of wall so gets pressed against wall
-            if(playerDeltaX < 0 && playerDeltaY > 0) {
-                turnPlayer(2f, tileSize, mapData);
-            } else if (playerDeltaX > 0 && playerDeltaY > 0) {
-                turnPlayer(-2f, tileSize, mapData);
-            } else if (playerDeltaX < 0 && playerDeltaY < 0) {
-                turnPlayer(-2f, tileSize, mapData);
-            } else if (playerDeltaX > 0 && playerDeltaY < 0) {
-                turnPlayer(2f, tileSize, mapData);
-            }
+            // Turn slightly away from wall when sliding against it
+            turnPlayer(playerDeltaY > 0 ? (playerDeltaX < 0 ? 2f : -2f) : (playerDeltaX < 0 ? -2f : 2f), tileSize, mapData);
         }
     }
 
@@ -146,25 +129,9 @@ public class Tank {
             boolean rearBlocked = !canMoveTo(playerX - playerDeltaX * tileSize, playerY - playerDeltaY * tileSize, -playerDeltaX, -playerDeltaY, tileSize, mapData);
 
             if (frontBlocked) {
-                if (newDeltaX > 0 && newDeltaY > 0) {
-                    movePlayer(-newDeltaY, tileSize, mapData);
-                } else if (newDeltaX > 0 && newDeltaY < 0) {
-                    movePlayer(newDeltaY, tileSize, mapData);
-                } else if (newDeltaX < 0 && newDeltaY < 0) {
-                    movePlayer(newDeltaY, tileSize, mapData);
-                } else if (newDeltaX < 0 && newDeltaY > 0) {
-                    movePlayer(-newDeltaY, tileSize, mapData);
-                }
+                movePlayer((newDeltaY > 0 ? -newDeltaY : newDeltaY), tileSize, mapData);
             } else if (rearBlocked) {
-                if (newDeltaX > 0 && newDeltaY > 0) {
-                    movePlayer(newDeltaY, tileSize, mapData);
-                } else if (newDeltaX > 0 && newDeltaY < 0) {
-                    movePlayer(-newDeltaY, tileSize, mapData);
-                } else if (newDeltaX < 0 && newDeltaY < 0) {
-                    movePlayer(-newDeltaY, tileSize, mapData);
-                } else if (newDeltaX < 0 && newDeltaY > 0) {
-                    movePlayer(newDeltaY, tileSize, mapData);
-                }
+                movePlayer((newDeltaY > 0 ? newDeltaY : -newDeltaY), tileSize, mapData);
             }
         }
     }
