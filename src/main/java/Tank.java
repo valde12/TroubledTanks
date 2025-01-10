@@ -21,34 +21,37 @@ public class Tank {
 
     public Tank(TankColor color) {
         switch (color) {
-            case Red:
-                bodyColor = new Color(139, 0, 0);  // Dark Red
-                barrelColor = Color.RED;
-                break;
-            case Green:
-                bodyColor = new Color(0, 100, 0);  // Dark Green
-                barrelColor = Color.GREEN;
-                break;
-            case Blue:
-                bodyColor = new Color(0, 0, 139);  // Dark Blue
-                barrelColor = Color.BLUE;
-                break;
-            case Yellow:
-                bodyColor = new Color(184, 134, 11);  // Dark Goldenrod
-                barrelColor = new Color(218, 165, 32);  // Goldenrod
-                break;
-            case Black:
-                bodyColor = Color.BLACK;
-                barrelColor = new Color(169, 169, 169);  // Dark Gray
-                break;
-            default:
-                bodyColor = Color.GRAY;
-                barrelColor = Color.DARK_GRAY;
-                break;
+            case Red -> setColors(new Color(139, 0, 0), Color.RED);
+            case Green -> setColors(new Color(0, 100, 0), Color.GREEN);
+            case Blue -> setColors(new Color(0, 0, 139), Color.BLUE);
+            case Yellow -> setColors(new Color(184, 134, 11), new Color(218, 165, 32));
+            case Black -> setColors(new Color(169, 169, 169), Color.BLACK);
+            default -> setColors(Color.GRAY, Color.DARK_GRAY);
         }
     }
 
+    private void setColors(Color bodyColor, Color barrelColor) {
+        this.bodyColor = bodyColor;
+        this.barrelColor = barrelColor;
+    }
+
     public void paintTank(Graphics g, int tileSize) {
+        scaleSizes(tileSize);
+
+        Point[] bodyPoints = calculateBodyPoints(playerX, playerY, playerDeltaX, playerDeltaY);
+
+        g.setColor(bodyColor);
+        g.fillPolygon(new int[] { bodyPoints[0].x, bodyPoints[1].x, bodyPoints[2].x, bodyPoints[3].x },
+                new int[] { bodyPoints[0].y, bodyPoints[1].y, bodyPoints[2].y, bodyPoints[3].y }, 4);
+
+        Point[] barrelPoints = calculateBarrelPoints(playerX, playerY, playerDeltaX, playerDeltaY);
+
+        g.setColor(barrelColor);
+        g.fillPolygon(new int[] { barrelPoints[0].x, barrelPoints[1].x, barrelPoints[2].x, barrelPoints[3].x },
+                new int[] { barrelPoints[0].y, barrelPoints[1].y, barrelPoints[2].y, barrelPoints[3].y }, 4);
+    }
+
+    private void scaleSizes(int tileSize) {
         if (currentTileSize == 0) {
             currentTileSize = tileSize;
         }
@@ -61,20 +64,6 @@ public class Tank {
         playerX = (playerX / currentTileSize) * tileSize;
         playerY = (playerY / currentTileSize) * tileSize;
         currentTileSize = tileSize;
-
-
-        Point[] bodyPoints = calculateBodyPoints(playerX, playerY, playerDeltaX, playerDeltaY);
-
-        g.setColor(bodyColor);
-        g.fillPolygon(new int[] { bodyPoints[0].x, bodyPoints[1].x, bodyPoints[2].x, bodyPoints[3].x },
-                new int[] { bodyPoints[0].y, bodyPoints[1].y, bodyPoints[2].y, bodyPoints[3].y }, 4);
-
-        // Barrel Points
-        Point[] barrelPoints = calculateBarrelPoints(playerX, playerY, playerDeltaX, playerDeltaY);
-
-        g.setColor(barrelColor);
-        g.fillPolygon(new int[] { barrelPoints[0].x, barrelPoints[1].x, barrelPoints[2].x, barrelPoints[3].x },
-                new int[] { barrelPoints[0].y, barrelPoints[1].y, barrelPoints[2].y, barrelPoints[3].y }, 4);
     }
 
     public void keystateCheck(List<List<Integer>> mapData, int tileSize) {
