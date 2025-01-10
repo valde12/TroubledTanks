@@ -142,9 +142,10 @@ public class Tank {
             playerDeltaX = newDeltaX;
             playerDeltaY = newDeltaY;
         } else {
-            // Push away from wall, if right up against it when turning
-            if (canMoveTo(playerX, playerY, playerDeltaX, newDeltaY, tileSize, mapData)
-                    || canMoveTo(playerX, playerY, newDeltaX, playerDeltaY, tileSize, mapData)) {
+            boolean frontBlocked = !canMoveTo(playerX + playerDeltaX * tileSize, playerY + playerDeltaY * tileSize, playerDeltaX, playerDeltaY, tileSize, mapData);
+            boolean rearBlocked = !canMoveTo(playerX - playerDeltaX * tileSize, playerY - playerDeltaY * tileSize, -playerDeltaX, -playerDeltaY, tileSize, mapData);
+
+            if (frontBlocked) {
                 if (newDeltaX > 0 && newDeltaY > 0) {
                     movePlayer(-newDeltaY, tileSize, mapData);
                 } else if (newDeltaX > 0 && newDeltaY < 0) {
@@ -154,9 +155,18 @@ public class Tank {
                 } else if (newDeltaX < 0 && newDeltaY > 0) {
                     movePlayer(-newDeltaY, tileSize, mapData);
                 }
+            } else if (rearBlocked) {
+                if (newDeltaX > 0 && newDeltaY > 0) {
+                    movePlayer(newDeltaY, tileSize, mapData);
+                } else if (newDeltaX > 0 && newDeltaY < 0) {
+                    movePlayer(-newDeltaY, tileSize, mapData);
+                } else if (newDeltaX < 0 && newDeltaY < 0) {
+                    movePlayer(-newDeltaY, tileSize, mapData);
+                } else if (newDeltaX < 0 && newDeltaY > 0) {
+                    movePlayer(newDeltaY, tileSize, mapData);
+                }
             }
         }
-
     }
 
     private boolean canMoveTo(float newX, float newY, float newPlayerDeltaX, float newPlayerDeltaY, int tileSize, List<List<Integer>> mapData) {
