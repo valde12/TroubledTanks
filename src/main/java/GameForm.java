@@ -7,10 +7,13 @@ import java.util.TimerTask;
 public class GameForm extends JFrame {
     private Timer timer;
     private Tank player;
+    private Board board;
 
     public GameForm() {
         super("Tank Trouble");  // Set the window title
-        player = new Tank(TankColor.Black);
+
+        player = new Tank(TankColor.Red);
+        board = new Board(Maps.MAP1);
 
         setSize(800, 600);  // Set initial size for the frame
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -21,7 +24,7 @@ public class GameForm extends JFrame {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                player.checkKeys();
+                player.keystateCheck(board.getMapData(), board.getTileSize());
                 repaint();  // Redraw the frame
             }
         }, 0, 16);  // Approx. 60 FPS
@@ -48,7 +51,8 @@ public class GameForm extends JFrame {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                player.paintTank(g);
+                board.paintMap(g, getWidth(), getHeight());
+                player.paintTank(g, board.getTileSize());
             }
         };
         add(gamePanel);
