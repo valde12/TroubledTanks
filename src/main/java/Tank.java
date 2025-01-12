@@ -2,6 +2,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -13,9 +14,13 @@ public class Tank {
     private float playerAngle = 0f;
     private float playerDeltaX = 1f;
     private float playerDeltaY = 0f;
+    private float projectileSize = 0f;
+    private float projectileSpeed = 10f;
     private int playerSpeed = 15;
     private int bodyWidth, bodyHeight, barrelWidth, barrelLength;
     private int currentTileSize = 0;
+    
+    private List<Projectile> projectiles = new ArrayList<>();
 
     private HashSet<Integer> keyStates = new HashSet<>();  // Track key presses
 
@@ -60,7 +65,9 @@ public class Tank {
         bodyHeight = tileSize / 2;
         barrelWidth = tileSize / 8;
         barrelLength = tileSize / 4;
+        projectileSize = tileSize / 8;
         playerSpeed = tileSize / 12;
+        projectileSpeed = tileSize / 10;
         playerX = (playerX / currentTileSize) * tileSize;
         playerY = (playerY / currentTileSize) * tileSize;
         currentTileSize = tileSize;
@@ -71,6 +78,7 @@ public class Tank {
         if (keyStates.contains(KeyEvent.VK_S)) movePlayer(-playerSpeed, tileSize, mapData);
         if (keyStates.contains(KeyEvent.VK_A)) turnPlayer(5f, tileSize, mapData);
         if (keyStates.contains(KeyEvent.VK_D)) turnPlayer(-5f, tileSize, mapData);
+        if (keyStates.contains(KeyEvent.VK_SPACE)) shoot();
     }
 
     public void keyDown(KeyEvent e) {
@@ -192,4 +200,21 @@ public class Tank {
         return barrelPoints;
     }
 
+    public void shoot() {
+        float projectileDeltaX = (float) Math.cos(Math.toRadians(playerAngle)) * projectileSpeed;
+        float projectileDeltaY = (float) -Math.sin(Math.toRadians(playerAngle)) * projectileSpeed;
+        projectiles.add(new Projectile(playerX, playerY, projectileDeltaX, projectileDeltaY, projectileSize));
+    }
+
+    public void updateProjectiles() {
+        for (Projectile projectile : projectiles) {
+            projectile.update();
+        }
+    }
+
+    public void drawProjectiles(Graphics g, int tileSize) {
+        for (Projectile projectile : projectiles) {
+            projectile.draw(g);
+        }
+    }
 }

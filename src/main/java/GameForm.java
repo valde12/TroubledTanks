@@ -1,8 +1,12 @@
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Graphics;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 public class GameForm extends JFrame {
     private Timer timer;
@@ -25,6 +29,7 @@ public class GameForm extends JFrame {
             @Override
             public void run() {
                 player.keystateCheck(board.getMapData(), board.getTileSize());
+                player.updateProjectiles();
                 repaint();  // Redraw the frame
             }
         }, 0, 16);  // Approx. 60 FPS
@@ -53,6 +58,7 @@ public class GameForm extends JFrame {
                 super.paintComponent(g);
                 board.paintMap(g, getWidth(), getHeight());
                 player.paintTank(g, board.getTileSize());
+                player.drawProjectiles(g, board.getTileSize());
             }
         };
         add(gamePanel);
