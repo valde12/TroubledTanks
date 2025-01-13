@@ -68,10 +68,12 @@ public class Server{
 
 
     public void startGame() throws InterruptedException {
+        chat.put("Hello From", ip);
+        chat.put("Start");
         chatRepository.closeGates();
         List<Object[]> c = chat.queryAll(new ActualField("Hello From"), new FormalField(String.class));
         int i = c.size();
-        new GameForm(3);
+        new GameForm(i);
     }
 
 
