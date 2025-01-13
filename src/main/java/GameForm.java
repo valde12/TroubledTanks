@@ -1,12 +1,6 @@
 import java.awt.Graphics;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 public class GameForm extends JFrame {
     public GameForm(Board board) {

@@ -80,7 +80,4 @@ public class Board {
         return mapData;
     }
 
-    public int getTileSize() {
-        return tileSize;
-    }
 }
