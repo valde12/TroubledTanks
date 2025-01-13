@@ -54,7 +54,7 @@ public class Server{
         name = name+" is hosting on ";
         System.out.println("Enter your IP");
         ip = in.readLine();
-        gameRooms.put(name, ip, ":9001");
+        gameRooms.put(name, ip, "9001");
         System.out.println("Hosting on " + ip + ":9001");
 
 
@@ -71,7 +71,7 @@ public class Server{
         chatRepository.closeGates();
         List<Object[]> c = chat.queryAll(new ActualField("Hello From"), new FormalField(String.class));
         int i = c.size();
-        new GameForm(i);
+        new GameForm(3);
     }
 
 
