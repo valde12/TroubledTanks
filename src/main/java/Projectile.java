@@ -17,7 +17,6 @@ public class Projectile implements IMovingGameObject {
 
     @Override
     public void update() {
-        System.out.println("Projectile update");
         x = x + deltaX;
         y = y + deltaY;
     }

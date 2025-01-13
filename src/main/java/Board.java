@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -11,19 +12,17 @@ public class Board {
 
     private final List<List<Integer>> mapData;
     private int tileSize;
-    private Tank player;
-    private HashSet<Integer> keyStates = new HashSet<>();
+    private List<Tank> tanks;
 
-    public Board(Maps map, int amountOfPlayers) {
+    public Board(Maps map, List<Tank> Tanks) {
         this.mapData = csvTo2DArray(map.getFilePath());
-        for (int i = 0; i < amountOfPlayers; i++) {
-            this.player = new Tank(TankColor.values()[i], mapData);
-        }
+        this.tanks = Tanks;
     }
     
     public void update() {
-        player.keystateCheck();
-        player.updateProjectiles();
+        for (Tank tank : tanks) {
+            tank.update();
+        }
     }
 
     private static List<List<Integer>> csvTo2DArray(String filePath) {
@@ -61,8 +60,9 @@ public class Board {
                 paintTile(g, col * tileSize, row * tileSize, tileSize, tileType);
             }
         }
-        player.draw(g, tileSize);
-
+        for (Tank tank : tanks) {
+            tank.draw(g, tileSize);
+        }
     }
 
     private void paintTile(Graphics g, int x, int y, int tileSize, int tileType) {
