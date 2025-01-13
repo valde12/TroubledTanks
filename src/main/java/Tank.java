@@ -16,12 +16,16 @@ public class Tank {
     private float playerDeltaY = 0f;
     private float projectileSize = 0f;
     private float projectileSpeed = 10f;
+    private int projectileLifeSpan = 3000;
     private int playerSpeed = 15;
     private int bodyWidth, bodyHeight, barrelWidth, barrelLength;
     private int currentTileSize = 0;
     private List<List<Integer>> mapData = new ArrayList<>();
     
     private List<Projectile> projectiles = new ArrayList<>();
+
+    private long lastShotTime = 0;
+    private final long shootCooldown = 500; // Cooldown duration in milliseconds
 
     public Tank(TankColor color) {
         switch (color) {
@@ -198,20 +202,30 @@ public class Tank {
     }
 
     public void shoot() {
-        float projectileDeltaX = (float) Math.cos(Math.toRadians(playerAngle)) * projectileSpeed;
-        float projectileDeltaY = (float) -Math.sin(Math.toRadians(playerAngle)) * projectileSpeed;
-        projectiles.add(new Projectile(playerX, playerY, projectileDeltaX, projectileDeltaY, projectileSize));
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastShotTime >= shootCooldown && projectiles.size() < 7) {
+            float projectileDeltaX = (float) Math.cos(Math.toRadians(playerAngle)) * projectileSpeed;
+            float projectileDeltaY = (float) -Math.sin(Math.toRadians(playerAngle)) * projectileSpeed;
+            projectiles.add(new Projectile(playerX, playerY, projectileDeltaX, projectileDeltaY, mapData));
+            lastShotTime = currentTime;
+        }
     }
 
     public void updateProjectiles() {
         for (Projectile projectile : projectiles) {
             projectile.update();
+            if (projectile.shouldBeDestroyed == true) {
+                projectiles.remove(projectile);
+                break;
+            }
+            
         }
     }
 
     public void drawProjectiles(Graphics g, int tileSize) {
         for (Projectile projectile : projectiles) {
             projectile.draw(g, tileSize);
+            
         }
     }
 
