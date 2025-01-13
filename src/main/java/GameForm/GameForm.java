@@ -10,7 +10,7 @@ public class GameForm extends JFrame {
     private Tank player;
 
     public GameForm(int i) {
-        super("GameForm.Tank Trouble");  // Set the window title
+        super("Tank Trouble");  // Set the window title
         if(i >0){
             player = new Tank(TankColor.Red);
         }else {player = new Tank(TankColor.Black);}
