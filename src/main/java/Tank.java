@@ -19,12 +19,13 @@ public class Tank {
     private int playerSpeed = 15;
     private int bodyWidth, bodyHeight, barrelWidth, barrelLength;
     private int currentTileSize = 0;
+    private List<List<Integer>> mapData = new ArrayList<>();
     
     private List<Projectile> projectiles = new ArrayList<>();
 
     private HashSet<Integer> keyStates = new HashSet<>();  // Track key presses
 
-    public Tank(TankColor color) {
+    public Tank(TankColor color, List<List<Integer>> mapData) {
         switch (color) {
             case Red -> setColors(new Color(139, 0, 0), Color.RED);
             case Green -> setColors(new Color(0, 100, 0), Color.GREEN);
@@ -33,6 +34,7 @@ public class Tank {
             case Black -> setColors(new Color(169, 169, 169), Color.BLACK);
             default -> setColors(Color.GRAY, Color.DARK_GRAY);
         }
+        this.mapData = mapData;
     }
 
     private void setColors(Color bodyColor, Color barrelColor) {
@@ -56,6 +58,7 @@ public class Tank {
         g.setColor(barrelColor);
         g.fillPolygon(new int[] { barrelPoints[0].x, barrelPoints[1].x, barrelPoints[2].x, barrelPoints[3].x },
                 new int[] { barrelPoints[0].y, barrelPoints[1].y, barrelPoints[2].y, barrelPoints[3].y }, 4);
+        drawProjectiles(g, tileSize);
     }
 
     private void scaleSizes(int tileSize) {
@@ -75,9 +78,12 @@ public class Tank {
         currentTileSize = tileSize;
     }
 
-    
+    public void update() {
+        keystateCheck();
+        updateProjectiles();
+    }
 
-    public void keystateCheck(List<List<Integer>> mapData) {
+    public void keystateCheck() {
         if (keyStates.contains(KeyEvent.VK_W)) movePlayer(playerSpeed, currentTileSize, mapData);
         if (keyStates.contains(KeyEvent.VK_S)) movePlayer(-playerSpeed, currentTileSize, mapData);
         if (keyStates.contains(KeyEvent.VK_A)) turnPlayer(5f, currentTileSize, mapData);

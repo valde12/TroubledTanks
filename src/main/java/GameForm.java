@@ -16,8 +16,7 @@ public class GameForm extends JFrame {
     public GameForm() {
         super("Tank Trouble");  // Set the window title
         
-        player = new Tank(TankColor.Red);
-        board = new Board(Maps.MAP1);
+        board = new Board(Maps.MAP1, 1);  // Load the map and create the player tank
 
         setSize(800, 600);  // Set initial size for the frame
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -28,8 +27,7 @@ public class GameForm extends JFrame {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                player.keystateCheck(board.getMapData());
-                player.updateProjectiles();
+                board.update();
                 repaint();  // Redraw the frame
             }
         }, 0, 16);  // Approx. 60 FPS
@@ -56,9 +54,7 @@ public class GameForm extends JFrame {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                board.paintMap(g, getWidth(), getHeight());
-                player.draw(g, board.getTileSize());
-                player.drawProjectiles(g, board.getTileSize());
+                board.draw(g, getWidth(), getHeight());
             }
         };
         add(gamePanel);
