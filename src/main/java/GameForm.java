@@ -15,7 +15,7 @@ public class GameForm extends JFrame {
 
     public GameForm() {
         super("Tank Trouble");  // Set the window title
-
+        
         player = new Tank(TankColor.Red);
         board = new Board(Maps.MAP1);
 
@@ -28,7 +28,7 @@ public class GameForm extends JFrame {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                player.keystateCheck(board.getMapData(), board.getTileSize());
+                player.keystateCheck(board.getMapData());
                 player.updateProjectiles();
                 repaint();  // Redraw the frame
             }
@@ -57,7 +57,7 @@ public class GameForm extends JFrame {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 board.paintMap(g, getWidth(), getHeight());
-                player.paintTank(g, board.getTileSize());
+                player.draw(g, board.getTileSize());
                 player.drawProjectiles(g, board.getTileSize());
             }
         };

@@ -40,9 +40,11 @@ public class Tank {
         this.barrelColor = barrelColor;
     }
 
-    public void paintTank(Graphics g, int tileSize) {
-        scaleSizes(tileSize);
-
+    public void draw(Graphics g, int tileSize) {
+        if (currentTileSize != tileSize) {
+            scaleSizes(tileSize);
+        }
+        
         Point[] bodyPoints = calculateBodyPoints(playerX, playerY, playerDeltaX, playerDeltaY);
 
         g.setColor(bodyColor);
@@ -73,11 +75,13 @@ public class Tank {
         currentTileSize = tileSize;
     }
 
-    public void keystateCheck(List<List<Integer>> mapData, int tileSize) {
-        if (keyStates.contains(KeyEvent.VK_W)) movePlayer(playerSpeed, tileSize, mapData);
-        if (keyStates.contains(KeyEvent.VK_S)) movePlayer(-playerSpeed, tileSize, mapData);
-        if (keyStates.contains(KeyEvent.VK_A)) turnPlayer(5f, tileSize, mapData);
-        if (keyStates.contains(KeyEvent.VK_D)) turnPlayer(-5f, tileSize, mapData);
+    
+
+    public void keystateCheck(List<List<Integer>> mapData) {
+        if (keyStates.contains(KeyEvent.VK_W)) movePlayer(playerSpeed, currentTileSize, mapData);
+        if (keyStates.contains(KeyEvent.VK_S)) movePlayer(-playerSpeed, currentTileSize, mapData);
+        if (keyStates.contains(KeyEvent.VK_A)) turnPlayer(5f, currentTileSize, mapData);
+        if (keyStates.contains(KeyEvent.VK_D)) turnPlayer(-5f, currentTileSize, mapData);
         if (keyStates.contains(KeyEvent.VK_SPACE)) shoot();
     }
 
@@ -214,7 +218,7 @@ public class Tank {
 
     public void drawProjectiles(Graphics g, int tileSize) {
         for (Projectile projectile : projectiles) {
-            projectile.draw(g);
+            projectile.draw(g, tileSize);
         }
     }
 }
