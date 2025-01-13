@@ -15,9 +15,7 @@ public class Tank {
     private float playerAngle = 0f;
     private float playerDeltaX = 1f;
     private float playerDeltaY = 0f;
-    private float projectileSize = 0f;
     private float projectileSpeed = 10f;
-    private int projectileLifeSpan = 3000;
     private int playerSpeed = 15;
     private int bodyWidth, bodyHeight, barrelWidth, barrelLength;
     private int currentTileSize = 0;
@@ -72,7 +70,6 @@ public class Tank {
         bodyHeight = tileSize / 2;
         barrelWidth = tileSize / 8;
         barrelLength = tileSize / 4;
-        projectileSize = tileSize / 8;
         playerSpeed = tileSize / 12;
         projectileSpeed = tileSize / 10;
         playerX = (playerX / currentTileSize) * tileSize;
