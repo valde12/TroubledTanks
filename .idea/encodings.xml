@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/jSpace/common/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jSpace/common/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jSpace/examples/DiningPhilosophers/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jSpace/examples/DiningPhilosophers/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jSpace/examples/HelloWorld/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jSpace/examples/HelloWorld/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jSpace/examples/PingPong/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jSpace/examples/PingPong/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jSpace/examples/ProducerConsumer/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jSpace/examples/ProducerConsumer/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jSpace/examples/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jSpace/examples/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jSpace/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jSpace/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
   </component>

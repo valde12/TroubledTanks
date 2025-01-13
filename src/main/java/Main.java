@@ -1,5 +1,11 @@
+import GameForm.GameForm;
+
 public class Main {
-    public static void main(String[] args) {
-        javax.swing.SwingUtilities.invokeLater(GameForm::new);
+    public static void main(String[] args) throws InterruptedException {
+
+        //javax.swing.SwingUtilities.invokeLater(GameForm::new);
+        new StartScreen();
+
+
     }
 }

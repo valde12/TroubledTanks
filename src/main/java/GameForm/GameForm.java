@@ -1,3 +1,4 @@
+package GameForm;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -8,9 +9,12 @@ public class GameForm extends JFrame {
     private Timer timer;
     private Tank player;
 
-    public GameForm() {
-        super("Tank Trouble");  // Set the window title
-        player = new Tank(TankColor.Black);
+    public GameForm(int i) {
+        super("GameForm.Tank Trouble");  // Set the window title
+        if(i >0){
+            player = new Tank(TankColor.Red);
+        }else {player = new Tank(TankColor.Black);}
+
 
         setSize(800, 600);  // Set initial size for the frame
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -54,7 +58,7 @@ public class GameForm extends JFrame {
         add(gamePanel);
     }
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         SwingUtilities.invokeLater(GameForm::new);  // Launch the form on the Event Dispatch Thread
-    }
+    }*/
 }

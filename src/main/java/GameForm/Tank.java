@@ -1,3 +1,5 @@
+package GameForm;
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -18,30 +20,30 @@ public class Tank {
 
     public Tank(TankColor color) {
         switch (color) {
-            case Red: // Red
+            case Red -> { // Red
                 bodyColor = new Color(139, 0, 0);  // Dark Red
                 barrelColor = Color.RED;
-                break;
-            case Green: // Green
+            }
+            case Green -> { // Green
                 bodyColor = new Color(0, 100, 0);  // Dark Green
                 barrelColor = Color.GREEN;
-                break;
-            case Blue: // Blue
+            }
+            case Blue -> { // Blue
                 bodyColor = new Color(0, 0, 139);  // Dark Blue
                 barrelColor = Color.BLUE;
-                break;
-            case Yellow: // Yellow
+            }
+            case Yellow -> { // Yellow
                 bodyColor = new Color(184, 134, 11);  // Dark Goldenrod
                 barrelColor = new Color(218, 165, 32);  // Goldenrod
-                break;
-            case Black: // Black
+            }
+            case Black -> { // Black
                 bodyColor = Color.BLACK;
                 barrelColor = new Color(169, 169, 169);  // Dark Gray
-                break;
-            default:
+            }
+            default -> {
                 bodyColor = Color.GRAY;
                 barrelColor = Color.DARK_GRAY;
-                break;
+            }
         }
     }
 
