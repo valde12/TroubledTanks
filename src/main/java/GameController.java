@@ -38,7 +38,14 @@ public class GameController {
                 board.update();
                 for (Player player : players) {
                     player.getTank().keystateCheck(keyStates);
+                    for (Projectile projectile : allProjectiles()) {
+                        if(player.getTank().isHit(projectile.getX(), projectile.getY())) {
+                            player.getTank().setPlayerX(100f);
+                            player.getTank().setPlayerY(100f);
+                        };
+                    }
                 }
+
                 gameForm.repaint();  // Redraw the frame
             }
         }, 0, 16);  // Approx. 60 FPS
@@ -68,5 +75,13 @@ public class GameController {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(GameController::new);  // Launch the form on the Event Dispatch Thread
+    }
+
+    public List<Projectile> allProjectiles() {
+        List<Projectile> projectiles = new ArrayList<>();
+        for (Player player : players) {
+            projectiles.addAll(player.getTank().getProjectiles());
+        }
+        return projectiles;
     }
 }

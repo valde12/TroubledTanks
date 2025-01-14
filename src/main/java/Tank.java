@@ -19,6 +19,8 @@ public class Tank {
     private int playerSpeed = 15;
     private int bodyWidth, bodyHeight, barrelWidth, barrelLength;
     private int currentTileSize = 0;
+    private Point[] bodyPoints;
+    private Point[] barrelPoints;
     private List<List<Integer>> mapData = new ArrayList<>();
     
     private List<Projectile> projectiles = new ArrayList<>();
@@ -47,13 +49,13 @@ public class Tank {
             scaleSizes(tileSize);
         }
         
-        Point[] bodyPoints = calculateBodyPoints(playerX, playerY, playerDeltaX, playerDeltaY);
+        bodyPoints = calculateBodyPoints(playerX, playerY, playerDeltaX, playerDeltaY);
 
         g.setColor(bodyColor);
         g.fillPolygon(new int[] { bodyPoints[0].x, bodyPoints[1].x, bodyPoints[2].x, bodyPoints[3].x },
                 new int[] { bodyPoints[0].y, bodyPoints[1].y, bodyPoints[2].y, bodyPoints[3].y }, 4);
 
-        Point[] barrelPoints = calculateBarrelPoints(playerX, playerY, playerDeltaX, playerDeltaY);
+        barrelPoints = calculateBarrelPoints(playerX, playerY, playerDeltaX, playerDeltaY);
 
         g.setColor(barrelColor);
         g.fillPolygon(new int[] { barrelPoints[0].x, barrelPoints[1].x, barrelPoints[2].x, barrelPoints[3].x },
@@ -173,6 +175,27 @@ public class Tank {
         return angle;
     }
 
+    public boolean isHit(int projectileX, int projectileY) {
+        // Check if the projectile is within body or barrel
+        return isPointInsidePolygon(bodyPoints, projectileX, projectileY) ||
+                isPointInsidePolygon(barrelPoints, projectileX, projectileY);
+    }
+
+    // Point-in-Polygon method using ray-casting algorithm
+    private boolean isPointInsidePolygon(Point[] polygon, int x, int y) {
+        boolean inside = false;
+        int n = polygon.length;
+
+        for (int i = 0, j = n - 1; i < n; j = i++) {
+            if ((polygon[i].y > y) != (polygon[j].y > y) &&
+                    (x < (polygon[j].x - polygon[i].x) * (y - polygon[i].y) / (polygon[j].y - polygon[i].y) + polygon[i].x)) {
+                inside = !inside;
+            }
+        }
+        return inside;
+    }
+
+
     private Point[] calculateBodyPoints(float playerX, float playerY, float playerDeltaX, float playerDeltaY) {
         Point[] bodyPoints = new Point[] {
                 new Point((int) (playerX + playerDeltaY * (bodyWidth / 2) - playerDeltaX * bodyHeight / 2),
@@ -204,7 +227,7 @@ public class Tank {
         if (currentTime - lastShotTime >= shootCooldown && projectiles.size() < 7) {
             float projectileDeltaX = (float) Math.cos(Math.toRadians(playerAngle)) * projectileSpeed;
             float projectileDeltaY = (float) -Math.sin(Math.toRadians(playerAngle)) * projectileSpeed;
-            projectiles.add(new Projectile(playerX, playerY, projectileDeltaX, projectileDeltaY, mapData));
+            projectiles.add(new Projectile(barrelPoints[3].x, barrelPoints[3].y, projectileDeltaX, projectileDeltaY, mapData));
             lastShotTime = currentTime;
         }
     }
@@ -227,7 +250,18 @@ public class Tank {
         }
     }
 
+    public List<Projectile> getProjectiles() {
+        return projectiles;
+    }
+
     public void setMapData(List<List<Integer>> mapData) {
         this.mapData = mapData;
+    }
+
+    public void setPlayerX(float playerX) {
+        this.playerX = playerX;
+    }
+    public void setPlayerY(float playerY) {
+        this.playerY = playerY;
     }
 }
