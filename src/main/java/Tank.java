@@ -5,13 +5,14 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Timer;
 
 public class Tank {
     private Color bodyColor;
     private Color barrelColor;
     private float playerX = 100f;
     private float playerY = 100f;
+    private float respawnX = 100f;
+    private float respawnY = 100f;
     private float playerAngle = 0f;
     private float playerDeltaX = 1f;
     private float playerDeltaY = 0f;
@@ -21,6 +22,7 @@ public class Tank {
     private int currentTileSize = 0;
     private Point[] bodyPoints;
     private Point[] barrelPoints;
+    private boolean isDead = false;
     private List<List<Integer>> mapData = new ArrayList<>();
     
     private List<Projectile> projectiles = new ArrayList<>();
@@ -28,7 +30,7 @@ public class Tank {
     private long lastShotTime = 0;
     private final long shootCooldown = 500; // Cooldown duration in milliseconds
 
-    public Tank(TankColor color) {
+    public Tank(TankColor color, float startX, float startY) {
         switch (color) {
             case Red -> setColors(new Color(139, 0, 0), Color.RED);
             case Green -> setColors(new Color(0, 100, 0), Color.GREEN);
@@ -37,6 +39,10 @@ public class Tank {
             case Black -> setColors(new Color(169, 169, 169), Color.BLACK);
             default -> setColors(Color.GRAY, Color.DARK_GRAY);
         }
+        this.respawnX = startX;
+        this.respawnY = startY;
+        this.playerX = startX;
+        this.playerY = startY;
     }
 
     private void setColors(Color bodyColor, Color barrelColor) {
@@ -45,10 +51,14 @@ public class Tank {
     }
 
     public void draw(Graphics g, int tileSize) {
+        
         if (currentTileSize != tileSize) {
             scaleSizes(tileSize);
         }
-        
+        drawProjectiles(g, tileSize);
+        if (isDead) {
+            return;
+        }
         bodyPoints = calculateBodyPoints(playerX, playerY, playerDeltaX, playerDeltaY);
 
         g.setColor(bodyColor);
@@ -60,7 +70,7 @@ public class Tank {
         g.setColor(barrelColor);
         g.fillPolygon(new int[] { barrelPoints[0].x, barrelPoints[1].x, barrelPoints[2].x, barrelPoints[3].x },
                 new int[] { barrelPoints[0].y, barrelPoints[1].y, barrelPoints[2].y, barrelPoints[3].y }, 4);
-        drawProjectiles(g, tileSize);
+        
     }
 
     private void scaleSizes(int tileSize) {
@@ -74,6 +84,8 @@ public class Tank {
         barrelLength = tileSize / 4;
         playerSpeed = tileSize / 12;
         projectileSpeed = tileSize / 10;
+        respawnX = (respawnX / currentTileSize) * tileSize;
+        respawnY = (respawnY / currentTileSize) * tileSize;
         playerX = (playerX / currentTileSize) * tileSize;
         playerY = (playerY / currentTileSize) * tileSize;
         currentTileSize = tileSize;
@@ -177,8 +189,13 @@ public class Tank {
 
     public boolean isHit(int projectileX, int projectileY) {
         // Check if the projectile is within body or barrel
-        return isPointInsidePolygon(bodyPoints, projectileX, projectileY) ||
-                isPointInsidePolygon(barrelPoints, projectileX, projectileY);
+        
+        if (isPointInsidePolygon(bodyPoints, projectileX, projectileY) ||
+                isPointInsidePolygon(barrelPoints, projectileX, projectileY)) {
+                    isDead = true;
+                    return true;
+        }
+        return false;            
     }
 
     // Point-in-Polygon method using ray-casting algorithm
@@ -222,7 +239,19 @@ public class Tank {
         return barrelPoints;
     }
 
+    public void respawn() {
+        playerX = respawnX;
+        playerY = respawnY;
+        playerAngle = 0f;
+        playerDeltaX = 1f;
+        playerDeltaY = 0f;
+        isDead = false;
+    }
+
     public void shoot() {
+        if (isDead) {
+            return;
+        }
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastShotTime >= shootCooldown && projectiles.size() < 7) {
             float projectileDeltaX = (float) Math.cos(Math.toRadians(playerAngle)) * projectileSpeed;
