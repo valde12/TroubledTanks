@@ -11,12 +11,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class Client {
     public boolean start = false;
-
+    private List<String> playerIps;
     private String ip;
 
     public void client() throws IOException, InterruptedException {
@@ -86,7 +87,13 @@ public class Client {
             }
         }
 
-        new GameController();
+        List<Object[]> c = gameRoom.queryAll(new ActualField("Hello From"), new FormalField(String.class));
+        playerIps = new ArrayList<>();
+        for (Object[] players : c) {
+            playerIps.add((String) players[1]);
+        }
+        new GameController(playerIps,ip);
+
 
 
     }

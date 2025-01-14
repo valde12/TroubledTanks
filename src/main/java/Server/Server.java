@@ -6,6 +6,7 @@ import org.jspace.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -16,11 +17,13 @@ public class Server{
 
     private String ip;
 
+    private List<String> playerIps;
 
     public Server() {
         // Initialize the chatRepository and chat space
         chatRepository = new SpaceRepository();
         chat = new SequentialSpace();
+        playerIps = new ArrayList<>();
     }
 
 
@@ -43,10 +46,8 @@ public class Server{
         /*
             This part adds the ip that the user wants to host on to the remote space gameRooms
          */
-
-
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         RemoteSpace gameRooms = new RemoteSpace("tcp://192.168.50.178:9001/gameRooms?keep");
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("Enter your name");
         String name = in.readLine();
         name = name+" is hosting on ";
@@ -70,10 +71,10 @@ public class Server{
         chat.put("Start");
         chatRepository.closeGates();
         List<Object[]> c = chat.queryAll(new ActualField("Hello From"), new FormalField(String.class));
-        for (Object[] room : c) {
-            System.out.println(room[0] + " "  + room[1]);
+        for (Object[] players : c) {
+            playerIps.add((String) players[1]);
         }
-        new GameController();
+        new GameController(playerIps, ip);
 
     }
 

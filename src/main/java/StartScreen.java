@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 import Client.Client;
+import Server.Server;
 
 public class StartScreen extends  JFrame{
 
@@ -34,7 +35,7 @@ public class StartScreen extends  JFrame{
         txtPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         add(txtPanel, BorderLayout.SOUTH);
         hostGame.addActionListener(e -> {
-            Server.Server s = new Server.Server();
+            Server s = new Server();
             try {
                 s.hostGame();
             } catch (IOException | InterruptedException ex) {

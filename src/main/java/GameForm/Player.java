@@ -5,8 +5,11 @@ public class Player {
     private Tank tank;
     private int score = 0;
 
-    public Player(TankColor Color, float startX, float startY) {
+    private String ip;
+
+    public Player(TankColor Color, String ip, float startX, float startY) {
         tank = new Tank(Color, startX, startY);
+        this.ip = ip;
     }
 
     public Tank getTank() {
@@ -19,5 +22,8 @@ public class Player {
 
     public void winRound() {
         this.score += 1;
+    }
+    public String getIp(){
+        return this.ip;
     }
 }

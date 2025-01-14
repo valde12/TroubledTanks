@@ -1,9 +1,9 @@
-import GameForm.GameForm;
+import GameForm.*;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
 
-        //javax.swing.SwingUtilities.invokeLater(GameForm::new);
+        //new GameController();
         new StartScreen();
 
 

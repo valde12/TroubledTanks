@@ -20,16 +20,35 @@ public class GameController {
     private List<Player> alivePlayers;
     private HashSet<Integer> keyStates = new HashSet<>();
 
-    public GameController() {
-        Player player1 = new Player(TankColor.Red, 100f, 100f);
+    private Player targetPlayer;
+
+    public GameController(List<String> ips, String targetIp) {
+        /*Player player1 = new Player(TankColor.Red, 100f, 100f);
         Player player2 = new Player(TankColor.Green, 200f, 200f);
         Player player3 = new Player(TankColor.Blue, 300f, 300f);
-        players = new ArrayList<>();
-        alivePlayers = new ArrayList<>();
         players.add(player1);
         players.add(player2);
-        players.add(player3);
+        players.add(player3);*/
+        players = new ArrayList<>();
+        TankColor[] colors = TankColor.values();
+        alivePlayers = new ArrayList<>();
+
+        int i =0;
+
+        for(String ip : ips){
+            TankColor color = colors[i];
+            Player player = new Player(color, ip, (i +1)*100f, (i+1)*100f);
+            players.add(player);
+            i++;
+        }
+        for(Player player : players){
+            if(player.getIp().equals(targetIp)){
+                targetPlayer = player;
+            }
+        }
+
         spawnAllPlayers();
+
 
         timer = new Timer();
 
@@ -49,11 +68,11 @@ public class GameController {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                board.update();
-                for (Player player : players) {
-                    player.getTank().keystateCheck(keyStates);
+                board.update();;
+                targetPlayer.getTank().keystateCheck(keyStates);
+                for(Player player : players) {
                     for (Projectile projectile : allProjectiles()) {
-                        if(player.getTank().isHit(projectile.getX(), projectile.getY())) {
+                        if (player.getTank().isHit(projectile.getX(), projectile.getY())) {
                             if (alivePlayers.contains(player)) {
                                 alivePlayers.remove(player);
                             }
@@ -92,9 +111,7 @@ public class GameController {
         keyStates.remove(e.getKeyCode());
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(GameController::new);  // Launch the form on the Event Dispatch Thread
-    }
+
 
     public List<Projectile> allProjectiles() {
         List<Projectile> projectiles = new ArrayList<>();
