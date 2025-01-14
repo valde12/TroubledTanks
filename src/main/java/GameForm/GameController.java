@@ -16,8 +16,10 @@ public class GameController {
 
     public GameController() {
         Player player1 = new Player(TankColor.Red);
+
         players = new ArrayList<Player>();
         players.add(player1);
+
 
         timer = new Timer();
 
@@ -68,7 +70,5 @@ public class GameController {
         keyStates.remove(e.getKeyCode());
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(GameController::new);  // Launch the form on the Event Dispatch Thread
-    }
+
 }

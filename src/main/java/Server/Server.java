@@ -70,7 +70,9 @@ public class Server{
         chat.put("Start");
         chatRepository.closeGates();
         List<Object[]> c = chat.queryAll(new ActualField("Hello From"), new FormalField(String.class));
-        int i = c.size();
+        for (Object[] room : c) {
+            System.out.println(room[0] + " "  + room[1]);
+        }
         new GameController();
 
     }

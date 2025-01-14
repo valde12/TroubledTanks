@@ -1,6 +1,6 @@
 package Client;
 
-import GameForm.GameForm;
+import GameForm.*;
 import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
@@ -85,6 +85,8 @@ public class Client {
                 System.out.println("Start");
             }
         }
+
+        new GameController();
 
 
     }
