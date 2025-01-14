@@ -190,8 +190,7 @@ public class Tank {
     public boolean isHit(int projectileX, int projectileY) {
         // Check if the projectile is within body or barrel
         
-        if (isPointInsidePolygon(bodyPoints, projectileX, projectileY) ||
-                isPointInsidePolygon(barrelPoints, projectileX, projectileY)) {
+        if (isPointInsidePolygon(bodyPoints, projectileX, projectileY)) {
                     isDead = true;
                     return true;
         }
