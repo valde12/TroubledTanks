@@ -77,4 +77,11 @@ public class Projectile {
 
         return mapData.get(tileY).get(tileX) != 1;
     }
+
+    public int getX() {
+        return (int) x;
+    }
+    public int getY() {
+        return (int) y;
+    }
 }

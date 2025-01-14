@@ -15,6 +15,8 @@ public class Tank {
     private Color barrelColor;
     private float playerX = 100f;
     private float playerY = 100f;
+    private float respawnX = 100f;
+    private float respawnY = 100f;
     private float playerAngle = 0f;
     private float playerDeltaX = 1f;
     private float playerDeltaY = 0f;
@@ -22,6 +24,9 @@ public class Tank {
     private int playerSpeed = 15;
     private int bodyWidth, bodyHeight, barrelWidth, barrelLength;
     private int currentTileSize = 0;
+    private Point[] bodyPoints;
+    private Point[] barrelPoints;
+    private boolean isDead = false;
     private List<List<Integer>> mapData = new ArrayList<>();
     
     private List<Projectile> projectiles = new ArrayList<>();
@@ -29,7 +34,7 @@ public class Tank {
     private long lastShotTime = 0;
     private final long shootCooldown = 500; // Cooldown duration in milliseconds
 
-    public Tank(TankColor color) {
+    public Tank(TankColor color, float startX, float startY) {
         switch (color) {
             case Red -> setColors(new Color(139, 0, 0), Color.RED);
             case Green -> setColors(new Color(0, 100, 0), Color.GREEN);
@@ -38,6 +43,10 @@ public class Tank {
             case Black -> setColors(new Color(169, 169, 169), Color.BLACK);
             default -> setColors(Color.GRAY, Color.DARK_GRAY);
         }
+        this.respawnX = startX;
+        this.respawnY = startY;
+        this.playerX = startX;
+        this.playerY = startY;
     }
 
     private void setColors(Color bodyColor, Color barrelColor) {
@@ -46,22 +55,26 @@ public class Tank {
     }
 
     public void draw(Graphics g, int tileSize) {
+        
         if (currentTileSize != tileSize) {
             scaleSizes(tileSize);
         }
-        
-        Point[] bodyPoints = calculateBodyPoints(playerX, playerY, playerDeltaX, playerDeltaY);
+        drawProjectiles(g, tileSize);
+        if (isDead) {
+            return;
+        }
+        bodyPoints = calculateBodyPoints(playerX, playerY, playerDeltaX, playerDeltaY);
 
         g.setColor(bodyColor);
         g.fillPolygon(new int[] { bodyPoints[0].x, bodyPoints[1].x, bodyPoints[2].x, bodyPoints[3].x },
                 new int[] { bodyPoints[0].y, bodyPoints[1].y, bodyPoints[2].y, bodyPoints[3].y }, 4);
 
-        Point[] barrelPoints = calculateBarrelPoints(playerX, playerY, playerDeltaX, playerDeltaY);
+        barrelPoints = calculateBarrelPoints(playerX, playerY, playerDeltaX, playerDeltaY);
 
         g.setColor(barrelColor);
         g.fillPolygon(new int[] { barrelPoints[0].x, barrelPoints[1].x, barrelPoints[2].x, barrelPoints[3].x },
                 new int[] { barrelPoints[0].y, barrelPoints[1].y, barrelPoints[2].y, barrelPoints[3].y }, 4);
-        drawProjectiles(g, tileSize);
+        
     }
 
     private void scaleSizes(int tileSize) {
@@ -75,6 +88,8 @@ public class Tank {
         barrelLength = tileSize / 4;
         playerSpeed = tileSize / 12;
         projectileSpeed = tileSize / 10;
+        respawnX = (respawnX / currentTileSize) * tileSize;
+        respawnY = (respawnY / currentTileSize) * tileSize;
         playerX = (playerX / currentTileSize) * tileSize;
         playerY = (playerY / currentTileSize) * tileSize;
         currentTileSize = tileSize;
@@ -176,6 +191,32 @@ public class Tank {
         return angle;
     }
 
+    public boolean isHit(int projectileX, int projectileY) {
+        // Check if the projectile is within body or barrel
+        
+        if (isPointInsidePolygon(bodyPoints, projectileX, projectileY) ||
+                isPointInsidePolygon(barrelPoints, projectileX, projectileY)) {
+                    isDead = true;
+                    return true;
+        }
+        return false;            
+    }
+
+    // Point-in-Polygon method using ray-casting algorithm
+    private boolean isPointInsidePolygon(Point[] polygon, int x, int y) {
+        boolean inside = false;
+        int n = polygon.length;
+
+        for (int i = 0, j = n - 1; i < n; j = i++) {
+            if ((polygon[i].y > y) != (polygon[j].y > y) &&
+                    (x < (polygon[j].x - polygon[i].x) * (y - polygon[i].y) / (polygon[j].y - polygon[i].y) + polygon[i].x)) {
+                inside = !inside;
+            }
+        }
+        return inside;
+    }
+
+
     private Point[] calculateBodyPoints(float playerX, float playerY, float playerDeltaX, float playerDeltaY) {
         Point[] bodyPoints = new Point[] {
                 new Point((int) (playerX + playerDeltaY * (bodyWidth / 2) - playerDeltaX * bodyHeight / 2),
@@ -202,12 +243,24 @@ public class Tank {
         return barrelPoints;
     }
 
+    public void respawn() {
+        playerX = respawnX;
+        playerY = respawnY;
+        playerAngle = 0f;
+        playerDeltaX = 1f;
+        playerDeltaY = 0f;
+        isDead = false;
+    }
+
     public void shoot() {
+        if (isDead) {
+            return;
+        }
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastShotTime >= shootCooldown && projectiles.size() < 7) {
             float projectileDeltaX = (float) Math.cos(Math.toRadians(playerAngle)) * projectileSpeed;
             float projectileDeltaY = (float) -Math.sin(Math.toRadians(playerAngle)) * projectileSpeed;
-            projectiles.add(new Projectile(playerX, playerY, projectileDeltaX, projectileDeltaY, mapData));
+            projectiles.add(new Projectile(barrelPoints[3].x, barrelPoints[3].y, projectileDeltaX, projectileDeltaY, mapData));
             lastShotTime = currentTime;
         }
     }
@@ -230,7 +283,18 @@ public class Tank {
         }
     }
 
+    public List<Projectile> getProjectiles() {
+        return projectiles;
+    }
+
     public void setMapData(List<List<Integer>> mapData) {
         this.mapData = mapData;
+    }
+
+    public void setPlayerX(float playerX) {
+        this.playerX = playerX;
+    }
+    public void setPlayerY(float playerY) {
+        this.playerY = playerY;
     }
 }
