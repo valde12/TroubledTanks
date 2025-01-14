@@ -1,5 +1,8 @@
-import java.awt.*;
-import java.io.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,11 +10,18 @@ public class Board {
 
     private final List<List<Integer>> mapData;
     private int tileSize;
+    private List<Tank> tanks;
 
-    public Board(Maps map) {
+    public Board(Maps map, List<Tank> Tanks) {
         this.mapData = csvTo2DArray(map.getFilePath());
+        this.tanks = Tanks;
     }
-
+    
+    public void update() {
+        for (Tank tank : tanks) {
+            tank.update();
+        }
+    }
 
     private static List<List<Integer>> csvTo2DArray(String filePath) {
         List<List<Integer>> result = new ArrayList<>();
@@ -33,13 +43,13 @@ public class Board {
         return result;
     }
 
-    public void paintMap(Graphics g, int panelWidth, int panelHeight) {
+    public void draw(Graphics g, int panelWidth, int panelHeight) {
         int rows = mapData.size();
         int cols = rows > 0 ? mapData.get(0).size() : 0;
         if (rows == 0 || cols == 0) {
             return;
         }
-
+        
         tileSize = Math.min(panelWidth / cols, panelHeight / rows); // Calculate tile size to fit map
 
         for (int row = 0; row < rows; row++) {
@@ -47,6 +57,9 @@ public class Board {
                 int tileType = mapData.get(row).get(col);
                 paintTile(g, col * tileSize, row * tileSize, tileSize, tileType);
             }
+        }
+        for (Tank tank : tanks) {
+            tank.draw(g, tileSize);
         }
     }
 
@@ -65,7 +78,4 @@ public class Board {
         return mapData;
     }
 
-    public int getTileSize() {
-        return tileSize;
-    }
 }

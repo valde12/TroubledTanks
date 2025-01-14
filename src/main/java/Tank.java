@@ -2,8 +2,10 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Timer;
 
 public class Tank {
     private Color bodyColor;
@@ -13,11 +15,16 @@ public class Tank {
     private float playerAngle = 0f;
     private float playerDeltaX = 1f;
     private float playerDeltaY = 0f;
+    private float projectileSpeed = 10f;
     private int playerSpeed = 15;
     private int bodyWidth, bodyHeight, barrelWidth, barrelLength;
     private int currentTileSize = 0;
+    private List<List<Integer>> mapData = new ArrayList<>();
+    
+    private List<Projectile> projectiles = new ArrayList<>();
 
-    private HashSet<Integer> keyStates = new HashSet<>();  // Track key presses
+    private long lastShotTime = 0;
+    private final long shootCooldown = 500; // Cooldown duration in milliseconds
 
     public Tank(TankColor color) {
         switch (color) {
@@ -35,9 +42,11 @@ public class Tank {
         this.barrelColor = barrelColor;
     }
 
-    public void paintTank(Graphics g, int tileSize) {
-        scaleSizes(tileSize);
-
+    public void draw(Graphics g, int tileSize) {
+        if (currentTileSize != tileSize) {
+            scaleSizes(tileSize);
+        }
+        
         Point[] bodyPoints = calculateBodyPoints(playerX, playerY, playerDeltaX, playerDeltaY);
 
         g.setColor(bodyColor);
@@ -49,6 +58,7 @@ public class Tank {
         g.setColor(barrelColor);
         g.fillPolygon(new int[] { barrelPoints[0].x, barrelPoints[1].x, barrelPoints[2].x, barrelPoints[3].x },
                 new int[] { barrelPoints[0].y, barrelPoints[1].y, barrelPoints[2].y, barrelPoints[3].y }, 4);
+        drawProjectiles(g, tileSize);
     }
 
     private void scaleSizes(int tileSize) {
@@ -61,24 +71,22 @@ public class Tank {
         barrelWidth = tileSize / 8;
         barrelLength = tileSize / 4;
         playerSpeed = tileSize / 12;
+        projectileSpeed = tileSize / 10;
         playerX = (playerX / currentTileSize) * tileSize;
         playerY = (playerY / currentTileSize) * tileSize;
         currentTileSize = tileSize;
     }
 
-    public void keystateCheck(List<List<Integer>> mapData, int tileSize) {
-        if (keyStates.contains(KeyEvent.VK_W)) movePlayer(playerSpeed, tileSize, mapData);
-        if (keyStates.contains(KeyEvent.VK_S)) movePlayer(-playerSpeed, tileSize, mapData);
-        if (keyStates.contains(KeyEvent.VK_A)) turnPlayer(5f, tileSize, mapData);
-        if (keyStates.contains(KeyEvent.VK_D)) turnPlayer(-5f, tileSize, mapData);
+    public void update() {
+        updateProjectiles();
     }
 
-    public void keyDown(KeyEvent e) {
-        keyStates.add(e.getKeyCode());
-    }
-
-    public void keyUp(KeyEvent e) {
-        keyStates.remove(e.getKeyCode());
+    public void keystateCheck(HashSet<Integer> keyStates) {
+        if (keyStates.contains(KeyEvent.VK_W)) movePlayer(playerSpeed, currentTileSize, mapData);
+        if (keyStates.contains(KeyEvent.VK_S)) movePlayer(-playerSpeed, currentTileSize, mapData);
+        if (keyStates.contains(KeyEvent.VK_A)) turnPlayer(5f, currentTileSize, mapData);
+        if (keyStates.contains(KeyEvent.VK_D)) turnPlayer(-5f, currentTileSize, mapData);
+        if (keyStates.contains(KeyEvent.VK_SPACE)) shoot();
     }
 
     private void movePlayer(float direction, int tileSize, List<List<Integer>> mapData) {
@@ -87,18 +95,17 @@ public class Tank {
 
         boolean canMoveX = canMoveTo(newX, playerY, playerDeltaX, playerDeltaY, tileSize, mapData);
         boolean canMoveY = canMoveTo(playerX, newY, playerDeltaX, playerDeltaY, tileSize, mapData);
-
         if (canMoveX && canMoveY) {
             playerX = newX;
             playerY = newY;
         } else if (canMoveX) {
             playerX = newX;
             // Turn slightly away from wall when sliding against it
-            turnPlayer(playerDeltaY > 0 ? (playerDeltaX < 0 ? -2f : 2f) : (playerDeltaX < 0 ? 2f : -2f), tileSize, mapData);
+            turnPlayer(playerDeltaY > 0 ? (playerDeltaX < 0 ? -1f : 1f) : (playerDeltaX < 0 ? 1f : -1f), tileSize, mapData);
         } else if (canMoveY) {
             playerY = newY;
             // Turn slightly away from wall when sliding against it
-            turnPlayer(playerDeltaY > 0 ? (playerDeltaX < 0 ? 2f : -2f) : (playerDeltaX < 0 ? -2f : 2f), tileSize, mapData);
+            turnPlayer(playerDeltaY > 0 ? (playerDeltaX < 0 ? 1f : -1f) : (playerDeltaX < 0 ? -1f : 1f), tileSize, mapData);
         }
     }
 
@@ -192,4 +199,35 @@ public class Tank {
         return barrelPoints;
     }
 
+    public void shoot() {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastShotTime >= shootCooldown && projectiles.size() < 7) {
+            float projectileDeltaX = (float) Math.cos(Math.toRadians(playerAngle)) * projectileSpeed;
+            float projectileDeltaY = (float) -Math.sin(Math.toRadians(playerAngle)) * projectileSpeed;
+            projectiles.add(new Projectile(playerX, playerY, projectileDeltaX, projectileDeltaY, mapData));
+            lastShotTime = currentTime;
+        }
+    }
+
+    public void updateProjectiles() {
+        for (Projectile projectile : projectiles) {
+            projectile.update();
+            if (projectile.shouldBeDestroyed == true) {
+                projectiles.remove(projectile);
+                break;
+            }
+            
+        }
+    }
+
+    public void drawProjectiles(Graphics g, int tileSize) {
+        for (Projectile projectile : projectiles) {
+            projectile.draw(g, tileSize);
+            
+        }
+    }
+
+    public void setMapData(List<List<Integer>> mapData) {
+        this.mapData = mapData;
+    }
 }
