@@ -1,12 +1,10 @@
 package Server;
 
-import GameForm.GameForm;
+import GameForm.GameController;
 import org.jspace.*;
-import javax.swing.*;
-import java.awt.*;
-import java.io.IOException;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 
@@ -73,8 +71,10 @@ public class Server{
         chatRepository.closeGates();
         List<Object[]> c = chat.queryAll(new ActualField("Hello From"), new FormalField(String.class));
         int i = c.size();
-        new GameForm(i);
+        new GameController();
+
     }
+
 
 
 

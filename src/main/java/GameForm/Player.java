@@ -1,3 +1,5 @@
+package GameForm;
+
 public class Player {
 
     private Tank tank;

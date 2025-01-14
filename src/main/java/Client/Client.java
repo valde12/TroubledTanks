@@ -85,8 +85,7 @@ public class Client {
                 System.out.println("Start");
             }
         }
-        int i = 3;
-        new GameForm(i);
+
 
     }
 
