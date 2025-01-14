@@ -22,8 +22,8 @@ public class GameController {
         Player player1 = new Player(TankColor.Red, 100f, 100f);
         Player player2 = new Player(TankColor.Green, 200f, 200f);
         Player player3 = new Player(TankColor.Blue, 300f, 300f);
-        players = new ArrayList<Player>();
-        alivePlayers = new ArrayList<Player>();
+        players = new ArrayList<>();
+        alivePlayers = new ArrayList<>();
         players.add(player1);
         players.add(player2);
         players.add(player3);
@@ -50,13 +50,21 @@ public class GameController {
                 board.update();
                 for (Player player : players) {
                     player.getTank().keystateCheck(keyStates);
-                    checkProjectileCollision(player);
+                    for (Projectile projectile : allProjectiles()) {
+                        if(player.getTank().isHit(projectile.getX(), projectile.getY())) {
+                            if (alivePlayers.contains(player)) {
+                                alivePlayers.remove(player);
+                            }
+                            if (alivePlayers.size() == 1) {
+                                alivePlayers.get(0).winRound();
+                                spawnAllPlayers();
+                            }
+                        }
+                    }
                 }
 
                 gameForm.repaint();  // Redraw the frame
             }
-
-            
         }, 0, 16);  // Approx. 60 FPS
 
         // Add key listener
@@ -85,19 +93,6 @@ public class GameController {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(GameController::new);  // Launch the form on the Event Dispatch Thread
     }
-    
-    private void checkProjectileCollision(Player player) {
-        for (Projectile projectile : allProjectiles()) {
-            if(player.getTank().isHit(projectile.getX(), projectile.getY())) {
-                alivePlayers.remove(player);
-                System.out.println(alivePlayers.size());
-                if (alivePlayers.size() <= 1) {
-                    alivePlayers.get(0).winRound();
-                    spawnAllPlayers();
-                }
-            }
-        }
-    }
 
     public List<Projectile> allProjectiles() {
         List<Projectile> projectiles = new ArrayList<>();
@@ -110,7 +105,9 @@ public class GameController {
     public void spawnAllPlayers() {
         for (Player player : players) {
             player.getTank().respawn();
-            alivePlayers.add(player);
+            if (!alivePlayers.contains(player)) {
+                alivePlayers.add(player);
+            }
         }
     }
 
