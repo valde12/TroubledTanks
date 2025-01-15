@@ -26,6 +26,10 @@ public class GameController {
     private PileSpace playerMovment;
     private Object[] qwe;
 
+    private String playerIP;
+    private float playerX;
+    private float playerY;
+
     private Player targetPlayer;
 
     public GameController(List<String> ips, String targetIp, boolean isHost) throws IOException {
@@ -95,6 +99,7 @@ public class GameController {
                 targetPlayer.getTank().keystateCheck(keyStates);
                 try {
                     playerMovment.put(targetIp, targetPlayer.getTank().getPlayerX(), targetPlayer.getTank().getPlayerY());
+                    System.out.println("Sending movement: " + targetPlayer.getIp() + " X: " + targetPlayer.getTank().getPlayerX() + " Y: " + targetPlayer.getTank().getPlayerY());
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -115,7 +120,7 @@ public class GameController {
                 gameForm.repaint();  // Redraw the frame
             }
         }, 0, 16);}// Approx. 60 FPS
-        else { timer.scheduleAtFixedRate(new TimerTask() {
+        if(!isHost){ timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 board.update();
@@ -128,9 +133,15 @@ public class GameController {
 
                 for(Player player : players){
                     try {
-                        qwe = cPlayermovement.queryp(new FormalField(String.class), new FormalField(float.class), new FormalField(float.class));
-                        if( qwe != null && player.getIp().equals(qwe[0])) {
-                            targetPlayer = player;
+                        qwe = cPlayermovement.queryp(new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class));
+                        System.out.println("Received movement: " + qwe[0] + " X: " + qwe[1] + " Y: " + qwe[2]);
+                        if( qwe != null && !qwe[0].equals(targetIp)){
+                            playerIP = (String) qwe[0];
+                            playerX = (Float) qwe[1];
+                            playerY = (Float) qwe[2];
+
+                        }
+                        if(player.getIp().equals(playerIP)) {
                             player.getTank().setPlayerX((Float) qwe[1]);
                             player.getTank().setPlayerY((Float) qwe[2]);
                         }
