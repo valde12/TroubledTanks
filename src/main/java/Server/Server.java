@@ -16,7 +16,7 @@ public class Server{
     private SequentialSpace chat;
 
     private String ip;
-
+    private PileSpace playerMovement;
     private List<String> playerIps;
 
     public Server() {
@@ -24,6 +24,7 @@ public class Server{
         chatRepository = new SpaceRepository();
         chat = new SequentialSpace();
         playerIps = new ArrayList<>();
+        playerMovement = new PileSpace();
     }
 
 
@@ -69,12 +70,22 @@ public class Server{
     public void startGame() throws InterruptedException {
         chat.put("Hello From", ip);
         chat.put("Start");
-        chatRepository.closeGates();
+        chatRepository.closeGate("tcp://"+ip+":9001/?keep");
         List<Object[]> c = chat.queryAll(new ActualField("Hello From"), new FormalField(String.class));
         for (Object[] players : c) {
             playerIps.add((String) players[1]);
         }
-        new GameController(playerIps, ip);
+        boolean isHost = true;
+        chatRepository.add("playerMovement", playerMovement);
+        chatRepository.addGate("tcp://"+ip+":9001/?keep");
+
+        new GameController(playerIps, ip, isHost);
+
+
+    }
+
+    public void playerMovement(float playerX, float playerY) throws InterruptedException {
+        playerMovement.put(ip, playerX,playerY);
 
     }
 

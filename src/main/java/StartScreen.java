@@ -6,17 +6,11 @@ import Client.Client;
 import Server.Server;
 
 public class StartScreen extends  JFrame{
-
     public StartScreen(){
-
         super("GameForm.Tank Trouble");
-
 
         setSize(800, 600);  // Set initial size for the frame
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-
-
 
         JPanel startPanel = new JPanel();
         JButton hostGame = new JButton("Host Game");
@@ -27,7 +21,6 @@ public class StartScreen extends  JFrame{
         add(startGame);
         setLayout(new BorderLayout());
         add(startPanel, BorderLayout.CENTER);
-
 
         JPanel txtPanel = new JPanel();
         JTextField txtField = new JTextField(40);
@@ -55,14 +48,7 @@ public class StartScreen extends  JFrame{
                 }
                 dispose();
             });
-
-
-
-
-
-            //JOptionPane.showMessageDialog(StartScreen.this ,"host pressed");
         });
-
 
         joinGame.addActionListener(e -> {
             startPanel.remove(hostGame);
@@ -73,23 +59,7 @@ public class StartScreen extends  JFrame{
             startPanel.repaint();
             Client c = new Client();
             try {c.client();} catch (IOException | InterruptedException ex) {throw new RuntimeException(ex);}
-
-            //JOptionPane.showMessageDialog(StartScreen.this ,"Join presed");
         });
-
-
-
-
-
-
-
-
         setVisible(true);
     }
-
-
-
-
-
-
 }

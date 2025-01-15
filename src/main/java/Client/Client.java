@@ -19,7 +19,7 @@ public class Client {
     public boolean start = false;
     private List<String> playerIps;
     private String ip;
-
+    private RemoteSpace playerMovement;
     public void client() throws IOException, InterruptedException {
 
         /*
@@ -66,37 +66,38 @@ public class Client {
             }
         });
         frame.add(joinButton, BorderLayout.SOUTH);
-
         frame.setVisible(true);
-
-
-
-
     }
 
     public void joinGame(String selectedRoom) throws IOException, InterruptedException {
         //TODO: implement logic for joining
-        RemoteSpace gameRoom = new RemoteSpace("tcp://"+ selectedRoom + "/chat?keep");
-        gameRoom.put("Hello From", ip);
-
+        RemoteSpace chat = new RemoteSpace("tcp://"+ selectedRoom + "/chat?keep");
+        chat.put("Hello From", ip);
+        boolean isHost = false;
         while(!start){
-            Object[] t = gameRoom.get(new ActualField("Start"));
+            Object[] t = chat.get(new ActualField("Start"));
             if(Objects.equals(t[0].toString(), "Start")){
                 start = true;
                 System.out.println("Start");
             }
         }
 
-        List<Object[]> c = gameRoom.queryAll(new ActualField("Hello From"), new FormalField(String.class));
+        List<Object[]> c = chat.queryAll(new ActualField("Hello From"), new FormalField(String.class));
         playerIps = new ArrayList<>();
         for (Object[] players : c) {
             playerIps.add((String) players[1]);
         }
-        new GameController(playerIps,ip);
-
-
-
+        chat.close();
+        playerMovement = new RemoteSpace("tcp://"+selectedRoom+":playerMovement/?keep");
+        new GameController(playerIps,ip,isHost);
     }
 
+    public void putplayerMovement(float playerX, float playerY) throws InterruptedException {
+        playerMovement.put(playerX, playerY);
+    }
 
+    public Object[] getPlayerMovement() throws InterruptedException {
+        return playerMovement.queryp(new FormalField(String.class), new FormalField(float.class), new FormalField(float.class));
+
+    }
 }

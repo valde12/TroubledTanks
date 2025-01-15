@@ -1,5 +1,8 @@
 package GameForm;
 
+import Client.Client;
+import Server.Server;
+
 import javax.swing.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -22,7 +25,7 @@ public class GameController {
 
     private Player targetPlayer;
 
-    public GameController(List<String> ips, String targetIp) {
+    public GameController(List<String> ips, String targetIp, boolean isHost) {
         /*Player player1 = new Player(TankColor.Red, 100f, 100f);
         Player player2 = new Player(TankColor.Green, 200f, 200f);
         Player player3 = new Player(TankColor.Blue, 300f, 300f);
@@ -47,9 +50,12 @@ public class GameController {
             }
         }
 
+
+
         spawnAllPlayers();
 
-
+        Server s = new Server();
+        Client c = new Client();
         timer = new Timer();
 
         List<Tank> Tanks = new ArrayList<>();
@@ -65,11 +71,17 @@ public class GameController {
             player.getTank().setMapData(board.getMapData());
         }
         // Timer setup for game loop
+        if(isHost){
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                board.update();;
+                board.update();
                 targetPlayer.getTank().keystateCheck(keyStates);
+                try {
+                    s.playerMovement(targetPlayer.getTank().getPlayerX(), targetPlayer.getTank().getPlayerY());
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
                 for(Player player : players) {
                     for (Projectile projectile : allProjectiles()) {
                         if (player.getTank().isHit(projectile.getX(), projectile.getY())) {
@@ -86,7 +98,47 @@ public class GameController {
 
                 gameForm.repaint();  // Redraw the frame
             }
-        }, 0, 16);  // Approx. 60 FPS
+        }, 0, 16);}// Approx. 60 FPS
+        else { timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                board.update();
+                targetPlayer.getTank().keystateCheck(keyStates);
+                try {
+                    c.putplayerMovement(targetPlayer.getTank().getPlayerX(), targetPlayer.getTank().getPlayerY());
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+                for(Player player : players){
+                    try {
+                        if(player.getIp().equals(c.getPlayerMovement()[0])){
+                            targetPlayer = player;
+                            player.getTank().setPlayerX((float) c.getPlayerMovement()[1]);
+                            player.getTank().setPlayerY((float) c.getPlayerMovement()[2]);
+                        }
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                for(Player player : players) {
+                    for (Projectile projectile : allProjectiles()) {
+                        if (player.getTank().isHit(projectile.getX(), projectile.getY())) {
+                            if (alivePlayers.contains(player)) {
+                                alivePlayers.remove(player);
+                            }
+                            if (alivePlayers.size() == 1) {
+                                alivePlayers.get(0).winRound();
+                                spawnAllPlayers();
+                            }
+                        }
+                    }
+                }
+
+                gameForm.repaint();  // Redraw the frame
+            }
+        }, 0, 16);}  // Approx. 60 FPS
 
         // Add key listener
         gameForm.addKeyListener(new KeyAdapter() {

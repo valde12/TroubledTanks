@@ -1,7 +1,5 @@
 package GameForm;
 
-import GameForm.Projectile;
-
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -290,6 +288,9 @@ public class Tank {
     public void setMapData(List<List<Integer>> mapData) {
         this.mapData = mapData;
     }
+
+    public float getPlayerX(){return this.playerX;}
+    public float getPlayerY(){return this.playerY;}
 
     public void setPlayerX(float playerX) {
         this.playerX = playerX;
