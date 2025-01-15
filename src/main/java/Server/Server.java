@@ -70,15 +70,15 @@ public class Server{
     public void startGame() throws InterruptedException {
         chat.put("Hello From", ip);
         chat.put("Start");
-        chatRepository.closeGate("tcp://"+ip+":9001/?keep");
+        //chatRepository.closeGate("tcp://"+ip+":9001/?keep");
         List<Object[]> c = chat.queryAll(new ActualField("Hello From"), new FormalField(String.class));
         for (Object[] players : c) {
             playerIps.add((String) players[1]);
         }
         boolean isHost = true;
         chatRepository.add("playerMovement", playerMovement);
-        chatRepository.addGate("tcp://"+ip+":9001/?keep");
-
+        chatRepository.addGate("tcp://"+ip+":9002/?keep");
+        chat.put("SS");
         new GameController(playerIps, ip, isHost);
 
 
