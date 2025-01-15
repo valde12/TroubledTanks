@@ -289,13 +289,14 @@ public class Tank {
         this.mapData = mapData;
     }
 
-    public float getPlayerX(){return this.playerX;}
-    public float getPlayerY(){return this.playerY;}
+    public float getPlayerX(){return this.playerX / currentTileSize;}
+    public float getPlayerY(){return this.playerY / currentTileSize;}
 
     public void setPlayerX(float playerX) {
-        this.playerX = playerX;
+        this.playerX = playerX * currentTileSize;
     }
     public void setPlayerY(float playerY) {
-        this.playerY = playerY;
+        this.playerY = playerY * currentTileSize;
+        ;
     }
 }
