@@ -133,7 +133,6 @@ public class GameController {
 
                 for(Player player : players){
                     try {
-                        System.out.println("as");
                         qwe = cPlayermovement.queryp(new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class));
                         if( qwe != null && !qwe[0].equals(targetIp)){
                             System.out.println("Received movement: " + qwe[0] + " X: " + qwe[1] + " Y: " + qwe[2]);
