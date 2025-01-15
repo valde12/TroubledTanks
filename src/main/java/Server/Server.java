@@ -67,7 +67,7 @@ public class Server{
     }
 
 
-    public void startGame() throws InterruptedException {
+    public void startGame() throws InterruptedException, IOException {
         chat.put("Hello From", ip);
         chat.put("Start");
         //chatRepository.closeGate("tcp://"+ip+":9001/?keep");
@@ -76,9 +76,9 @@ public class Server{
             playerIps.add((String) players[1]);
         }
         boolean isHost = true;
-        chatRepository.add("playerMovement", playerMovement);
-        chatRepository.addGate("tcp://"+ip+":9002/?keep");
-        chat.put("SS");
+       /// chatRepository.add("playerMovement", playerMovement);
+       /// chatRepository.addGate("tcp://"+ip+":9002/?keep");
+       /// chat.put("SS");
         new GameController(playerIps, ip, isHost);
 
 

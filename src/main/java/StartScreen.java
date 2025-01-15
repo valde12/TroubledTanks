@@ -45,6 +45,8 @@ public class StartScreen extends  JFrame{
                     s.startGame();
                 } catch (InterruptedException ex) {
                     throw new RuntimeException(ex);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
                 }
                 dispose();
             });

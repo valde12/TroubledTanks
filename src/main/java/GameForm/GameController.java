@@ -2,17 +2,16 @@ package GameForm;
 
 import Client.Client;
 import Server.Server;
+import org.jspace.*;
 
-import javax.swing.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import javax.swing.SwingUtilities;
 
 public class GameController {
 
@@ -22,10 +21,14 @@ public class GameController {
     private List<Player> players;
     private List<Player> alivePlayers;
     private HashSet<Integer> keyStates = new HashSet<>();
+    private RemoteSpace cPlayermovement;
+    private SpaceRepository asd;
+    private PileSpace playerMovment;
+    private Object[] qwe;
 
     private Player targetPlayer;
 
-    public GameController(List<String> ips, String targetIp, boolean isHost) {
+    public GameController(List<String> ips, String targetIp, boolean isHost) throws IOException {
         /*Player player1 = new Player(TankColor.Red, 100f, 100f);
         Player player2 = new Player(TankColor.Green, 200f, 200f);
         Player player3 = new Player(TankColor.Blue, 300f, 300f);
@@ -49,7 +52,20 @@ public class GameController {
                 targetPlayer = player;
             }
         }
+        if(isHost){
+            asd = new SpaceRepository();
+            playerMovment = new PileSpace();
+            asd.add("playerMovment",playerMovment);
 
+            asd.addGate("tcp://"+ targetIp + ":9002/?keep");
+        }
+        else{
+            String ddd = null;
+         for(Player player : players){
+             ddd = player.getIp();
+         }
+            cPlayermovement = new RemoteSpace("tcp://"+ ddd + "9002/playerMovement?keep");
+        }
 
 
         spawnAllPlayers();
@@ -78,7 +94,7 @@ public class GameController {
                 board.update();
                 targetPlayer.getTank().keystateCheck(keyStates);
                 try {
-                    s.playerMovement(targetPlayer.getTank().getPlayerX(), targetPlayer.getTank().getPlayerY());
+                    playerMovment.put(targetIp, targetPlayer.getTank().getPlayerX(), targetPlayer.getTank().getPlayerY());
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -105,17 +121,18 @@ public class GameController {
                 board.update();
                 targetPlayer.getTank().keystateCheck(keyStates);
                 try {
-                    c.putplayerMovement(targetPlayer.getTank().getPlayerX(), targetPlayer.getTank().getPlayerY());
+                    cPlayermovement.put(targetPlayer.getTank().getPlayerX(), targetPlayer.getTank().getPlayerY());
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
 
                 for(Player player : players){
                     try {
-                        if(player.getIp().equals(c.getPlayerMovement()[0])){
+                        qwe = cPlayermovement.queryp(new FormalField(String.class), new FormalField(float.class), new FormalField(float.class));
+                        if( qwe != null && player.getIp().equals(qwe[0])) {
                             targetPlayer = player;
-                            player.getTank().setPlayerX((float) c.getPlayerMovement()[1]);
-                            player.getTank().setPlayerY((float) c.getPlayerMovement()[2]);
+                            player.getTank().setPlayerX((Float) qwe[1]);
+                            player.getTank().setPlayerY((Float) qwe[2]);
                         }
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);

@@ -88,7 +88,7 @@ public class Client {
             playerIps.add((String) players[1]);
         }
         chat.close();
-        playerMovement = new RemoteSpace("tcp://"+selectedRoom+":playerMovement/?keep");
+       // playerMovement = new RemoteSpace("tcp://"+selectedRoom+":playerMovement/?keep");
         new GameController(playerIps,ip,isHost);
     }
 
