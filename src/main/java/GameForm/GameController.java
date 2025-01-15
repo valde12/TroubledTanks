@@ -59,7 +59,7 @@ public class GameController {
         if(isHost){
             asd = new SpaceRepository();
             playerMovment = new PileSpace();
-            asd.add("playerMovment",playerMovment);
+            asd.add("playerMovement",playerMovment);
 
             asd.addGate("tcp://"+ targetIp + ":9002/?keep");
         }
@@ -68,7 +68,7 @@ public class GameController {
          for(Player player : players){
              ddd = player.getIp();
          }
-            cPlayermovement = new RemoteSpace("tcp://"+ ddd + "9002/playerMovement?keep");
+            cPlayermovement = new RemoteSpace("tcp://"+ ddd + ":9002/playerMovement?keep");
         }
 
 
@@ -133,9 +133,10 @@ public class GameController {
 
                 for(Player player : players){
                     try {
+                        System.out.println("as");
                         qwe = cPlayermovement.queryp(new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class));
-                        System.out.println("Received movement: " + qwe[0] + " X: " + qwe[1] + " Y: " + qwe[2]);
                         if( qwe != null && !qwe[0].equals(targetIp)){
+                            System.out.println("Received movement: " + qwe[0] + " X: " + qwe[1] + " Y: " + qwe[2]);
                             playerIP = (String) qwe[0];
                             playerX = (Float) qwe[1];
                             playerY = (Float) qwe[2];
