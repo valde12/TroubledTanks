@@ -32,7 +32,7 @@ public class GameController {
     private HashSet<Integer> playerKeyState;
     private Player targetPlayer;
 
-    public GameController(List<String> ips, String targetIp, boolean isHost) throws IOException {
+    public GameController(List<String> ips, String targetIp, boolean isHost, String id, List<String> ids) throws IOException {
         /*Player player1 = new Player(TankColor.Red, 100f, 100f);
         Player player2 = new Player(TankColor.Green, 200f, 200f);
         Player player3 = new Player(TankColor.Blue, 300f, 300f);
@@ -99,18 +99,22 @@ public class GameController {
                 targetPlayer.getTank().keystateCheck(keyStates);
                 try {
                     if(!keyStates.isEmpty()) {
-                        playerMovment.put(targetIp, new ArrayList<>(keyStates));
-                        System.out.println("Sending movement: " + targetPlayer.getIp() + keyStates);
+                        for (String i : ids) {
+                            if(!i.equals(id)) {
+                                playerMovment.put(i, targetIp, new ArrayList<>(keyStates));
+                                System.out.println("Sending movement: " + targetPlayer.getIp() + keyStates);
+                            }
+                        }
                     }
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
                 for(Player player : players){
-                    qwe = playerMovment.queryp(new FormalField(String.class), new FormalField(List.class));
-                    if( qwe != null && !qwe[0].equals(targetIp)){
-                        System.out.println("Received movement: " + qwe[0] + " keyState " + qwe[1]);
-                        playerIP = (String) qwe[0];
-                        List<?> receivedList = (List<?>) qwe[1];
+                    qwe = playerMovment.queryp(new ActualField(id),new FormalField(String.class), new FormalField(List.class));
+                    if( qwe != null && qwe[0].equals(id) && !qwe[1].equals(targetIp)){
+                        System.out.println("Received movement: " + qwe[0] + " keyState " + qwe[2]);
+                        playerIP = (String) qwe[1];
+                        List<?> receivedList = (List<?>) qwe[2];
                         playerKeyState = new HashSet<>();
                         for (Object key : receivedList) {
                             if (key instanceof Number) {
@@ -147,7 +151,11 @@ public class GameController {
                 targetPlayer.getTank().keystateCheck(keyStates);
                 try {
                     if(!keyStates.isEmpty()) {
-                        cPlayermovement.put(targetIp, new ArrayList<>(keyStates));
+                        for(String a : ids) {
+                            if(!a.equals(id)) {
+                                cPlayermovement.put(a ,targetIp, new ArrayList<>(keyStates));
+                            }
+                        }
                     }
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
@@ -155,14 +163,14 @@ public class GameController {
 
                 for(Player player : players){
                     try {
-                        qwe = cPlayermovement.queryp(new FormalField(String.class), new FormalField(List.class) );
+                        qwe = cPlayermovement.getp(new ActualField(id),new FormalField(String.class), new FormalField(List.class) );
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-                    if( qwe != null && !qwe[0].equals(targetIp)){
+                    if( qwe != null && qwe[0].equals(id) && !qwe[1].equals(targetIp)){
                         System.out.println("Received movement: " + qwe[0] + " keyState " + qwe[1]);
                         playerIP = (String) qwe[0];
-                        List<?> receivedList = (List<?>) qwe[1];
+                        List<?> receivedList = (List<?>) qwe[2];
                         playerKeyState = new HashSet<>();
                         for (Object key : receivedList) {
                             if (key instanceof Number) {
@@ -173,6 +181,7 @@ public class GameController {
                     }
                     if(player.getIp().equals(playerIP)) {
                         player.getTank().keystateCheck(playerKeyState);
+                        playerKeyState.clear();
                     }
                 }
 

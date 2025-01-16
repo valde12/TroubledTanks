@@ -19,6 +19,8 @@ public class Client {
     public boolean start = false;
     private List<String> playerIps;
     private String ip;
+    private String id;
+    private List<String> ids;
     private RemoteSpace playerMovement;
     public void client() throws IOException, InterruptedException {
 
@@ -72,7 +74,9 @@ public class Client {
     public void joinGame(String selectedRoom) throws IOException, InterruptedException {
         //TODO: implement logic for joining
         RemoteSpace chat = new RemoteSpace("tcp://"+ selectedRoom + "/chat?keep");
-        chat.put("Hello From", ip);
+        List<Object[]> c = chat.queryAll(new ActualField("Hello From"), new FormalField(String.class), new FormalField(String.class));
+        id = String.valueOf(c.size());
+        chat.put("Hello From", ip, id);
         boolean isHost = false;
         while(!start){
             Object[] t = chat.get(new ActualField("Start"));
@@ -82,22 +86,15 @@ public class Client {
             }
         }
 
-        List<Object[]> c = chat.queryAll(new ActualField("Hello From"), new FormalField(String.class));
         playerIps = new ArrayList<>();
         for (Object[] players : c) {
             playerIps.add((String) players[1]);
+            ids.add((String) players[2]);
         }
         chat.close();
        // playerMovement = new RemoteSpace("tcp://"+selectedRoom+":playerMovement/?keep");
-        new GameController(playerIps,ip,isHost);
+        new GameController(playerIps,ip,isHost, id, ids);
     }
 
-    public void putplayerMovement(float playerX, float playerY) throws InterruptedException {
-        playerMovement.put(playerX, playerY);
-    }
 
-    public Object[] getPlayerMovement() throws InterruptedException {
-        return playerMovement.queryp(new FormalField(String.class), new FormalField(float.class), new FormalField(float.class));
-
-    }
 }
