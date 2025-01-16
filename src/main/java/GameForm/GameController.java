@@ -98,22 +98,21 @@ public class GameController {
                 board.update();
                 targetPlayer.getTank().keystateCheck(keyStates);
                 try {
-                    playerMovment.put(targetIp, new HashSet<>(keyStates));
+                    playerMovment.put(targetIp, new ArrayList<>(keyStates));
                     System.out.println("Sending movement: " + targetPlayer.getIp() + keyStates);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
                 for(Player player : players){
-                    qwe = playerMovment.queryp(new FormalField(String.class), new FormalField(HashSet.class) );
+                    qwe = playerMovment.queryp(new FormalField(String.class), new FormalField(List.class));
                     if( qwe != null && !qwe[0].equals(targetIp)){
                         System.out.println("Received movement: " + qwe[0] + " keyState " + qwe[1]);
                         playerIP = (String) qwe[0];
-                        playerKeyState = (HashSet<Integer>) qwe[1];
-                        for(Object key : (HashSet<?>) qwe[1]){
-                            if (key instanceof Integer) {
-                                playerKeyState.add((Integer) key);
-                            } else if (key instanceof Float) {
-                                playerKeyState.add(((Float) key).intValue());
+                        List<?> receivedList = (List<?>) qwe[1];
+                        playerKeyState = new HashSet<>();
+                        for (Object key : receivedList) {
+                            if (key instanceof Number) {
+                                playerKeyState.add(((Number) key).intValue());
                             }
                         }
 
@@ -145,26 +144,25 @@ public class GameController {
                 board.update();
                 targetPlayer.getTank().keystateCheck(keyStates);
                 try {
-                    cPlayermovement.put(targetIp, keyStates);
+                    cPlayermovement.put(targetIp, new ArrayList<>(keyStates));
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
 
                 for(Player player : players){
                     try {
-                        qwe = cPlayermovement.queryp(new FormalField(String.class), new FormalField(HashSet.class) );
+                        qwe = cPlayermovement.queryp(new FormalField(String.class), new FormalField(List.class) );
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
                     if( qwe != null && !qwe[0].equals(targetIp)){
                         System.out.println("Received movement: " + qwe[0] + " keyState " + qwe[1]);
                         playerIP = (String) qwe[0];
-                        playerKeyState = (HashSet<Integer>) qwe[1];
-                        for(Object key : (HashSet<?>) qwe[1]){
-                            if (key instanceof Integer) {
-                                playerKeyState.add((Integer) key);
-                            } else if (key instanceof Float) {
-                                playerKeyState.add(((Float) key).intValue());
+                        List<?> receivedList = (List<?>) qwe[1];
+                        playerKeyState = new HashSet<>();
+                        for (Object key : receivedList) {
+                            if (key instanceof Number) {
+                                playerKeyState.add(((Number) key).intValue());
                             }
                         }
 
