@@ -108,7 +108,14 @@ public class GameController {
                     if( qwe != null && !qwe[0].equals(targetIp)){
                         System.out.println("Received movement: " + qwe[0] + " keyState " + qwe[1]);
                         playerIP = (String) qwe[0];
-                        playerKeyState = (HashSet<Integer>) qwe[1];
+                        playerKeyState = new HashSet<>();
+                        for(Object key : (HashSet<?>) qwe[1]){
+                            if (key instanceof Integer) {
+                                playerKeyState.add((Integer) key);
+                            } else if (key instanceof Float) {
+                                playerKeyState.add(((Float) key).intValue());
+                            }
+                        }
 
                     }
                     if(player.getIp().equals(playerIP)) {
@@ -152,7 +159,14 @@ public class GameController {
                     if( qwe != null && !qwe[0].equals(targetIp)){
                         System.out.println("Received movement: " + qwe[0] + " keyState " + qwe[1]);
                         playerIP = (String) qwe[0];
-                        playerKeyState = (HashSet<Integer>) qwe[1];
+                        playerKeyState = new HashSet<>();
+                        for(Object key : (HashSet<?>) qwe[1]){
+                            if (key instanceof Integer) {
+                                playerKeyState.add((Integer) key);
+                            } else if (key instanceof Float) {
+                                playerKeyState.add(((Float) key).intValue());
+                            }
+                        }
 
                     }
                     if(player.getIp().equals(playerIP)) {
