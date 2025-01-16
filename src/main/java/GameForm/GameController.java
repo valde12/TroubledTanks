@@ -22,9 +22,9 @@ public class GameController {
     private List<Player> alivePlayers;
     private HashSet<Integer> keyStates = new HashSet<>();
     private RemoteSpace cPlayermovement;
-    private SpaceRepository asd;
-    private PileSpace playerMovment;
-    private Object[] qwe;
+    private SpaceRepository spaceRepo;
+    private SequentialSpace playerMovment;
+    private Object[] receivedMovement;
 
     private String playerIP;
     private float playerX;
@@ -57,18 +57,18 @@ public class GameController {
             }
         }
         if(isHost){
-            asd = new SpaceRepository();
-            playerMovment = new PileSpace();
-            asd.add("playerMovement",playerMovment);
+            spaceRepo = new SpaceRepository();
+            playerMovment = new SequentialSpace();
+            spaceRepo.add("playerMovement",playerMovment);
 
-            asd.addGate("tcp://"+ targetIp + ":9002/?keep");
+            spaceRepo.addGate("tcp://"+ targetIp + ":9002/?keep");
         }
         else{
-            String ddd = null;
+            String hostIp = null;
          for(Player player : players){
-             ddd = player.getIp();
+             hostIp = player.getIp();
          }
-            cPlayermovement = new RemoteSpace("tcp://"+ ddd + ":9002/playerMovement?keep");
+            cPlayermovement = new RemoteSpace("tcp://"+ hostIp + ":9002/playerMovement?keep");
         }
 
 
@@ -110,11 +110,11 @@ public class GameController {
                     throw new RuntimeException(e);
                 }
                 for(Player player : players){
-                    qwe = playerMovment.queryp(new ActualField(id),new FormalField(String.class), new FormalField(List.class));
-                    if( qwe != null && qwe[0].equals(id) && !qwe[1].equals(targetIp)){
-                        System.out.println("Received movement: " + qwe[0] + " keyState " + qwe[2]);
-                        playerIP = (String) qwe[1];
-                        List<?> receivedList = (List<?>) qwe[2];
+                    receivedMovement = playerMovment.getp(new ActualField(id),new FormalField(String.class), new FormalField(List.class));
+                    if( receivedMovement != null && receivedMovement[0].equals(id) && !receivedMovement[1].equals(targetIp)){
+                        System.out.println("Received movement: " + receivedMovement[0] + " keyState " + receivedMovement[2]);
+                        playerIP = (String) receivedMovement[1];
+                        List<?> receivedList = (List<?>) receivedMovement[2];
                         playerKeyState = new HashSet<>();
                         for (Object key : receivedList) {
                             if (key instanceof Number) {
@@ -125,6 +125,7 @@ public class GameController {
                     }
                     if(player.getIp().equals(playerIP)) {
                         player.getTank().keystateCheck(playerKeyState);
+                        playerKeyState.clear();
                     }
                 }
                 for(Player player : players) {
@@ -163,14 +164,14 @@ public class GameController {
 
                 for(Player player : players){
                     try {
-                        qwe = cPlayermovement.getp(new ActualField(id),new FormalField(String.class), new FormalField(List.class) );
+                        receivedMovement = cPlayermovement.getp(new ActualField(id),new FormalField(String.class), new FormalField(List.class) );
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-                    if( qwe != null && qwe[0].equals(id) && !qwe[1].equals(targetIp)){
-                        System.out.println("Received movement: " + qwe[0] + " keyState " + qwe[1]);
-                        playerIP = (String) qwe[0];
-                        List<?> receivedList = (List<?>) qwe[2];
+                    if( receivedMovement != null && receivedMovement[0].equals(id) && !receivedMovement[1].equals(targetIp)){
+                        System.out.println("Received movement: " + receivedMovement[0] + " keyState " + receivedMovement[1]);
+                        playerIP = (String) receivedMovement[0];
+                        List<?> receivedList = (List<?>) receivedMovement[2];
                         playerKeyState = new HashSet<>();
                         for (Object key : receivedList) {
                             if (key instanceof Number) {
