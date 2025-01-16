@@ -98,8 +98,10 @@ public class GameController {
                 board.update();
                 targetPlayer.getTank().keystateCheck(keyStates);
                 try {
-                    playerMovment.put(targetIp, new ArrayList<>(keyStates));
-                    System.out.println("Sending movement: " + targetPlayer.getIp() + keyStates);
+                    if(!keyStates.isEmpty()) {
+                        playerMovment.put(targetIp, new ArrayList<>(keyStates));
+                        System.out.println("Sending movement: " + targetPlayer.getIp() + keyStates);
+                    }
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -144,7 +146,9 @@ public class GameController {
                 board.update();
                 targetPlayer.getTank().keystateCheck(keyStates);
                 try {
-                    cPlayermovement.put(targetIp, new ArrayList<>(keyStates));
+                    if(!keyStates.isEmpty()) {
+                        cPlayermovement.put(targetIp, new ArrayList<>(keyStates));
+                    }
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
