@@ -98,7 +98,7 @@ public class GameController {
                 board.update();
                 targetPlayer.getTank().keystateCheck(keyStates);
                 try {
-                    playerMovment.put(targetIp, keyStates);
+                    playerMovment.put(targetIp, new HashSet<>(keyStates));
                     System.out.println("Sending movement: " + targetPlayer.getIp() + keyStates);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
@@ -108,7 +108,7 @@ public class GameController {
                     if( qwe != null && !qwe[0].equals(targetIp)){
                         System.out.println("Received movement: " + qwe[0] + " keyState " + qwe[1]);
                         playerIP = (String) qwe[0];
-                        playerKeyState = new HashSet<>();
+                        playerKeyState = (HashSet<Integer>) qwe[1];
                         for(Object key : (HashSet<?>) qwe[1]){
                             if (key instanceof Integer) {
                                 playerKeyState.add((Integer) key);
@@ -159,7 +159,7 @@ public class GameController {
                     if( qwe != null && !qwe[0].equals(targetIp)){
                         System.out.println("Received movement: " + qwe[0] + " keyState " + qwe[1]);
                         playerIP = (String) qwe[0];
-                        playerKeyState = new HashSet<>();
+                        playerKeyState = (HashSet<Integer>) qwe[1];
                         for(Object key : (HashSet<?>) qwe[1]){
                             if (key instanceof Integer) {
                                 playerKeyState.add((Integer) key);
