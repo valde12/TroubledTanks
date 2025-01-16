@@ -85,9 +85,9 @@ public class Client {
                 System.out.println("Start");
             }
         }
-
+        List<Object[]> a = chat.queryAll(new ActualField("Hello From"), new FormalField(String.class), new FormalField(String.class));
         playerIps = new ArrayList<>();
-        for (Object[] players : c) {
+        for (Object[] players : a) {
             playerIps.add((String) players[1]);
             ids.add((String) players[2]);
         }

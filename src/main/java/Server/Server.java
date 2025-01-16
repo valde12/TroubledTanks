@@ -75,8 +75,9 @@ public class Server{
         id = String.valueOf(c.size());
         chat.put("Hello From", ip, id);
         chat.put("Start");
-        //chatRepository.closeGate("tcp://"+ip+":9001/?keep");
-        for (Object[] players : c) {
+        //chatRepository.closeGate("tcp://"+ip+":9001/?keep");'
+        List<Object[]> a = chat.queryAll(new ActualField("Hello From"), new FormalField(String.class) , new FormalField(String.class));
+        for (Object[] players : a) {
             playerIps.add((String) players[1]);
             ids.add((String) players[2]);
         }
