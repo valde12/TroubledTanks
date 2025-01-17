@@ -33,12 +33,6 @@ public class GameController {
     private Player targetPlayer;
 
     public GameController(List<String> ips, String targetIp, boolean isHost, String id, List<String> ids) throws IOException {
-        /*Player player1 = new Player(TankColor.Red, 100f, 100f);
-        Player player2 = new Player(TankColor.Green, 200f, 200f);
-        Player player3 = new Player(TankColor.Blue, 300f, 300f);
-        players.add(player1);
-        players.add(player2);
-        players.add(player3);*/
         players = new ArrayList<>();
         TankColor[] colors = TankColor.values();
         alivePlayers = new ArrayList<>();
@@ -60,7 +54,6 @@ public class GameController {
             spaceRepo = new SpaceRepository();
             playerMovment = new SequentialSpace();
             spaceRepo.add("playerMovement",playerMovment);
-
             spaceRepo.addGate("tcp://"+ targetIp + ":9002/?keep");
         }
         else{
@@ -74,8 +67,6 @@ public class GameController {
 
         spawnAllPlayers();
 
-        Server s = new Server();
-        Client c = new Client();
         timer = new Timer();
 
         List<Tank> Tanks = new ArrayList<>();
@@ -91,7 +82,7 @@ public class GameController {
             player.getTank().setMapData(board.getMapData());
         }
         // Timer setup for game loop
-        if(isHost){
+
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -101,8 +92,12 @@ public class GameController {
                     if(!keyStates.isEmpty()) {
                         for (String i : ids) {
                             if(!i.equals(id)) {
-                                playerMovment.put(i, targetIp, new ArrayList<>(keyStates));
-                                System.out.println("Sending movement: " + targetPlayer.getIp() + keyStates);
+                                if (isHost) {
+                                    playerMovment.put(i, targetIp, new ArrayList<>(keyStates));
+                                    System.out.println("Sending movement: " + targetPlayer.getIp() + keyStates);
+                                } else {
+                                    cPlayermovement.put(i ,targetIp, new ArrayList<>(keyStates));
+                                }
                             }
                         }
                     }
@@ -110,7 +105,8 @@ public class GameController {
                     throw new RuntimeException(e);
                 }
                 for(Player player : players){
-                    receivedMovement = playerMovment.getp(new ActualField(id),new FormalField(String.class), new FormalField(List.class));
+                    receivedMovement = retrieveMovement(isHost, id);
+
                     if( receivedMovement != null && receivedMovement[0].equals(id) && !receivedMovement[1].equals(targetIp)){
                         System.out.println("Received movement: " + receivedMovement[0] + " keyState " + receivedMovement[2]);
                         playerIP = (String) receivedMovement[1];
@@ -123,86 +119,12 @@ public class GameController {
                         }
 
                     }
-                    if(player.getIp().equals(playerIP)) {
-                        player.getTank().keystateCheck(playerKeyState);
-                        playerKeyState.clear();
-                    }
+                    applyPlayerMovements(player);
                 }
-                for(Player player : players) {
-                    for (Projectile projectile : allProjectiles()) {
-                        if (player.getTank().isHit(projectile.getX(), projectile.getY())) {
-                            if (alivePlayers.contains(player)) {
-                                alivePlayers.remove(player);
-                            }
-                            if (alivePlayers.size() == 1) {
-                                alivePlayers.get(0).winRound();
-                                spawnAllPlayers();
-                            }
-                        }
-                    }
-                }
-
+                CheckDeaths();
                 gameForm.repaint();  // Redraw the frame
             }
-        }, 0, 16);}// Approx. 60 FPS
-        if(!isHost){ timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                board.update();
-                targetPlayer.getTank().keystateCheck(keyStates);
-                try {
-                    if(!keyStates.isEmpty()) {
-                        for(String a : ids) {
-                            if(!a.equals(id)) {
-                                cPlayermovement.put(a ,targetIp, new ArrayList<>(keyStates));
-                            }
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-
-                for(Player player : players){
-                    try {
-                        receivedMovement = cPlayermovement.getp(new ActualField(id),new FormalField(String.class), new FormalField(List.class) );
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    if( receivedMovement != null && receivedMovement[0].equals(id) && !receivedMovement[1].equals(targetIp)){
-                        System.out.println("Received movement: " + receivedMovement[0] + " keyState " + receivedMovement[1]);
-                        playerIP = (String) receivedMovement[0];
-                        List<?> receivedList = (List<?>) receivedMovement[2];
-                        playerKeyState = new HashSet<>();
-                        for (Object key : receivedList) {
-                            if (key instanceof Number) {
-                                playerKeyState.add(((Number) key).intValue());
-                            }
-                        }
-
-                    }
-                    if(player.getIp().equals(playerIP)) {
-                        player.getTank().keystateCheck(playerKeyState);
-                        playerKeyState.clear();
-                    }
-                }
-
-                for(Player player : players) {
-                    for (Projectile projectile : allProjectiles()) {
-                        if (player.getTank().isHit(projectile.getX(), projectile.getY())) {
-                            if (alivePlayers.contains(player)) {
-                                alivePlayers.remove(player);
-                            }
-                            if (alivePlayers.size() == 1) {
-                                alivePlayers.get(0).winRound();
-                                spawnAllPlayers();
-                            }
-                        }
-                    }
-                }
-
-                gameForm.repaint();  // Redraw the frame
-            }
-        }, 0, 16);}  // Approx. 60 FPS
+        }, 0, 16);// Approx. 60 FPS
 
         // Add key listener
         gameForm.addKeyListener(new KeyAdapter() {
@@ -219,6 +141,39 @@ public class GameController {
 
     }
 
+    private Object[] retrieveMovement(boolean isHost, String id) {
+        try {
+            if (isHost) {
+                return playerMovment.getp(new ActualField(id), new FormalField(String.class), new FormalField(List.class));
+            } else {
+                return cPlayermovement.getp(new ActualField(id), new FormalField(String.class), new FormalField(List.class));
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void applyPlayerMovements(Player player) {
+        if (player.getIp().equals(playerIP)) {
+            player.getTank().keystateCheck(playerKeyState);
+            playerKeyState.clear();
+        }
+    }
+
+    private void CheckDeaths() {
+        for(Player player : players) {
+            for (Projectile projectile : allProjectiles()) {
+                if (player.getTank().isHit(projectile.getX(), projectile.getY())) {
+                    alivePlayers.remove(player);
+                    if (alivePlayers.size() == 1) {
+                        alivePlayers.get(0).winRound();
+                        spawnAllPlayers();
+                    }
+                }
+            }
+        }
+    }
+
     public void keyDown(KeyEvent e) {
         keyStates.add(e.getKeyCode());
     }
@@ -226,8 +181,6 @@ public class GameController {
     public void keyUp(KeyEvent e) {
         keyStates.remove(e.getKeyCode());
     }
-
-
 
     public List<Projectile> allProjectiles() {
         List<Projectile> projectiles = new ArrayList<>();
