@@ -87,7 +87,7 @@ public class Client {
 
     public void joinGame(String selectedRoom) throws IOException, InterruptedException {
         //TODO: implement logic for joining
-        RemoteSpace chat = new RemoteSpace("tcp://"+ selectedRoom + "/chat?keep");
+        RemoteSpace chat = new RemoteSpace(TCP_PREFIX + selectedRoom + "/chat?keep");
         List<Object[]> c = chat.queryAll(new ActualField("Hello From"), new FormalField(String.class), new FormalField(String.class));
         id = String.valueOf(c.size());
         chat.put("Hello From", ip, id);
