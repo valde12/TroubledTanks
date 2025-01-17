@@ -25,7 +25,7 @@ public class Server{
 
     private static final String HOST_PORT = "9001";
     private static final String TCP_PREFIX = "tcp://";
-    private static final String SERVER_IP = "192.168.1.47";
+    private static final String SERVER_IP = "192.168.50.178";
     private static final String HOST_IP = "0.0.0.0";
 
     public Server() {

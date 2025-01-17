@@ -1,7 +1,7 @@
 package GameForm;
 
 public enum Maps {
-    MAP1("C:\\Users\\ottes\\IdeaProjects\\TroubledTanks\\src\\maps\\map1.csv");
+    MAP1("C:\\Users\\caspe\\IdeaProjects\\TroubledTanks\\src\\maps\\map1.csv");
 
     private final String filePath;
 

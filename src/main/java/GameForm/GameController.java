@@ -92,18 +92,20 @@ public class GameController {
                     receivedMovement = retrieveMovement(isHost ? playerMovement : cPlayermovement, id);
 
                     if( receivedMovement != null && receivedMovement[0].equals(id) && !receivedMovement[1].equals(targetIp)){
-                        System.out.println("Received movement: " + receivedMovement[0] + " keyState " + receivedMovement[2]);
+                        System.out.println("Received movement: " + receivedMovement[0] + " Player X = " + receivedMovement[2] + "Player Y = " + receivedMovement[3]);
                         playerIP = (String) receivedMovement[1];
-                        List<?> receivedList = (List<?>) receivedMovement[2];
+                        playerX = (float) receivedMovement[2];
+                        playerY = (float) receivedMovement[3];
+                        /*List<?> receivedList = (List<?>) receivedMovement[2];
                         playerKeyState = new HashSet<>();
                         for (Object key : receivedList) {
                             if (key instanceof Number) {
                                 playerKeyState.add(((Number) key).intValue());
                             }
-                        }
+                        }*/
 
                     }
-                    applyPlayerMovements(player);
+                    applyPlayerMovements(player, playerX, playerY);
                 }
                 CheckDeaths();
                 gameForm.repaint();  // Redraw the frame
@@ -125,14 +127,18 @@ public class GameController {
 
     }
 
+
+    // TODO: Send playerX and playerY
     private void processKeyStates(Space playerMovementSpace, String id, String targetIp, List<String> ids) {
         try {
             if (!keyStates.isEmpty()) {
+                float playerX = targetPlayer.getTank().getPlayerX();
+                float playerY = targetPlayer.getTank().getPlayerY();
                 for (String i : ids) {
                     if (!i.equals(id)) {
-                        List<Integer> keys = new ArrayList<>(keyStates);
-                        playerMovementSpace.put(i, targetIp, keys);
-                        System.out.println("Sending movement: " + targetPlayer.getIp() + keyStates);
+                        //List<Integer> keys = new ArrayList<>(keyStates);
+                        playerMovementSpace.put(i, targetIp, playerX, playerY);
+                        System.out.println("Sending movement: " + targetPlayer.getIp());
                     }
                 }
             }
@@ -141,19 +147,25 @@ public class GameController {
         }
     }
 
+
+    // TODO: Receive playerX and playerY
     private Object[] retrieveMovement(Space playerMovementSpace, String id) {
         try {
-            return playerMovementSpace.getp(new ActualField(id), new FormalField(String.class), new FormalField(List.class));
+            return playerMovementSpace.getp(new ActualField(id), new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class) );
         } catch (InterruptedException e) {
             handleException(e);
             return null;
         }
     }
 
-    private void applyPlayerMovements(Player player) {
+
+    // TODO: set to playerX and playerY
+    private void applyPlayerMovements(Player player, float playerX, float playerY) {
         if (player.getIp().equals(playerIP)) {
-            player.getTank().keystateCheck(playerKeyState);
-            playerKeyState.clear();
+            /*player.getTank().keystateCheck(playerKeyState);
+            playerKeyState.clear();*/
+            player.getTank().setPlayerX(playerX);
+            player.getTank().setPlayerY(playerY);
         }
     }
 

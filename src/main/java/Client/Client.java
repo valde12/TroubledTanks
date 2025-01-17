@@ -27,7 +27,7 @@ public class Client {
 
     private static final String HOST_PORT = "9001";
     private static final String TCP_PREFIX = "tcp://";
-    private static final String SERVER_IP = "192.168.1.47";
+    private static final String SERVER_IP = "192.168.50.178";
 
     public void client() throws IOException, InterruptedException {
 
@@ -86,7 +86,6 @@ public class Client {
     }
 
     public void joinGame(String selectedRoom) throws IOException, InterruptedException {
-        //TODO: implement logic for joining
         RemoteSpace chat = new RemoteSpace(TCP_PREFIX + selectedRoom + "/chat?keep");
         List<Object[]> c = chat.queryAll(new ActualField("Hello From"), new FormalField(String.class), new FormalField(String.class));
         id = String.valueOf(c.size());
