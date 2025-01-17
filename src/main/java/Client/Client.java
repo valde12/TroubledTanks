@@ -11,6 +11,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,10 +29,17 @@ public class Client {
         /*
             This part queries all the ip's and ports from the remote space gameRooms and lists them out
          */
-        System.out.println("Enter your ip");
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        ip = in.readLine();
-        RemoteSpace gameRooms = new RemoteSpace("tcp://192.168.50.178:9001/gameRooms?keep");
+        try {
+            InetAddress address = InetAddress.getLocalHost();
+            System.out.println("IP address: " + address.getHostAddress());
+            ip = address.getHostAddress();
+        } catch (UnknownHostException ex) {
+            System.out.println("Could not find IP address for this host");
+            System.out.println("Enter your ip");
+            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+            ip = in.readLine();
+        }
+        RemoteSpace gameRooms = new RemoteSpace("tcp://192.168.1.47:9001/gameRooms?keep");
         List<Object[]> gRooms = gameRooms.queryAll(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class));
 
         for (Object[] room : gRooms) {

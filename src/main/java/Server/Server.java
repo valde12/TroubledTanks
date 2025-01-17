@@ -6,6 +6,8 @@ import org.jspace.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,33 +42,32 @@ public class Server{
 
         repository.add("gameRooms",gameRooms);
 
-        repository.addGate("tcp://192.168.50.231:9001/?keep");
-
-
+        repository.addGate("tcp://0.0.0.0:9001/?keep");
 
     }
 
-    public void hostGame() throws IOException, InterruptedException {
+    public void hostGame(String name) throws IOException, InterruptedException {
         /*
             This part adds the ip that the user wants to host on to the remote space gameRooms
          */
-        RemoteSpace gameRooms = new RemoteSpace("tcp://192.168.50.178:9001/gameRooms?keep");
+        RemoteSpace gameRooms = new RemoteSpace("tcp://192.168.1.47:9001/gameRooms?keep");
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("Enter your name");
-        String name = in.readLine();
         name = name+" is hosting on ";
-        System.out.println("Enter your IP");
-        ip = in.readLine();
+        try {
+            InetAddress address = InetAddress.getLocalHost();
+            System.out.println("IP address: " + address.getHostAddress());
+            ip = address.getHostAddress();
+        } catch (UnknownHostException ex) {
+            System.out.println("Could not find IP address for this host");
+            System.out.println("Enter your ip");
+            ip = in.readLine();
+        }
         gameRooms.put(name, ip, "9001");
         System.out.println("Hosting on " + ip + ":9001");
 
 
         chatRepository.add("chat",chat);
         chatRepository.addGate("tcp://"+ip+":9001/?keep");
-
-        //TODO: Implement logic for hosting game
-
-
     }
 
 

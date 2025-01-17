@@ -5,8 +5,8 @@ import java.io.IOException;
 import Client.Client;
 import Server.Server;
 
-public class StartScreen extends  JFrame{
-    public StartScreen(){
+public class StartScreen extends JFrame {
+    public StartScreen() {
         super("GameForm.Tank Trouble");
 
         setSize(800, 600);  // Set initial size for the frame
@@ -16,9 +16,11 @@ public class StartScreen extends  JFrame{
         JButton hostGame = new JButton("Host Game");
         JButton joinGame = new JButton("Join Game");
         JButton startGame = new JButton("Start Game");
+        JTextField nameField = new JTextField(20);  // Field for entering the player name
+        startPanel.add(new JLabel("Enter your name:"));
+        startPanel.add(nameField);
         startPanel.add(hostGame);
         startPanel.add(joinGame);
-        add(startGame);
         setLayout(new BorderLayout());
         add(startPanel, BorderLayout.CENTER);
 
@@ -27,10 +29,16 @@ public class StartScreen extends  JFrame{
         txtField.setFont(txtField.getFont().deriveFont(10f));
         txtPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         add(txtPanel, BorderLayout.SOUTH);
+
         hostGame.addActionListener(e -> {
+            String playerName = nameField.getText().trim();
+            if (playerName.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter a name to host the game.");
+                return;
+            }
             Server s = new Server();
             try {
-                s.hostGame();
+                s.hostGame(playerName);  // Pass the name to hostGame
             } catch (IOException | InterruptedException ex) {
                 throw new RuntimeException(ex);
             }
@@ -43,9 +51,7 @@ public class StartScreen extends  JFrame{
             startGame.addActionListener(e1 -> {
                 try {
                     s.startGame();
-                } catch (InterruptedException ex) {
-                    throw new RuntimeException(ex);
-                } catch (IOException ex) {
+                } catch (InterruptedException | IOException ex) {
                     throw new RuntimeException(ex);
                 }
                 dispose();
@@ -60,7 +66,11 @@ public class StartScreen extends  JFrame{
             startPanel.revalidate();
             startPanel.repaint();
             Client c = new Client();
-            try {c.client();} catch (IOException | InterruptedException ex) {throw new RuntimeException(ex);}
+            try {
+                c.client();
+            } catch (IOException | InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
         });
         setVisible(true);
     }
