@@ -1,7 +1,5 @@
 package GameForm;
 
-import Client.Client;
-import Server.Server;
 import org.jspace.*;
 
 import java.awt.event.KeyAdapter;
@@ -23,7 +21,7 @@ public class GameController {
     private HashSet<Integer> keyStates = new HashSet<>();
     private RemoteSpace cPlayermovement;
     private SpaceRepository spaceRepo;
-    private SequentialSpace playerMovment;
+    private SequentialSpace playerMovement;
     private Object[] receivedMovement;
 
     private String playerIP;
@@ -31,6 +29,9 @@ public class GameController {
     private float playerY;
     private HashSet<Integer> playerKeyState;
     private Player targetPlayer;
+
+    private static final String MOVEMENT_PORT = "9002";
+    private static final String TCP_PREFIX = "tcp://";
 
     public GameController(List<String> ips, String targetIp, boolean isHost, String id, List<String> ids) throws IOException {
         players = new ArrayList<>();
@@ -52,18 +53,16 @@ public class GameController {
         }
         if(isHost){
             spaceRepo = new SpaceRepository();
-            playerMovment = new SequentialSpace();
-            spaceRepo.add("playerMovement",playerMovment);
-            spaceRepo.addGate("tcp://"+ targetIp + ":9002/?keep");
-        }
-        else{
+            playerMovement = new SequentialSpace();
+            spaceRepo.add("playerMovement", playerMovement);
+            spaceRepo.addGate(TCP_PREFIX + targetIp + ":" + MOVEMENT_PORT + "/?keep");
+        } else {
             String hostIp = null;
-         for(Player player : players){
-             hostIp = player.getIp();
-         }
-            cPlayermovement = new RemoteSpace("tcp://"+ hostIp + ":9002/playerMovement?keep");
+             for(Player player : players){
+                 hostIp = player.getIp();
+             }
+            cPlayermovement = new RemoteSpace(TCP_PREFIX + hostIp + ":" + MOVEMENT_PORT + "/playerMovement?keep");
         }
-
 
         spawnAllPlayers();
 
@@ -88,24 +87,9 @@ public class GameController {
             public void run() {
                 board.update();
                 targetPlayer.getTank().keystateCheck(keyStates);
-                try {
-                    if(!keyStates.isEmpty()) {
-                        for (String i : ids) {
-                            if(!i.equals(id)) {
-                                if (isHost) {
-                                    playerMovment.put(i, targetIp, new ArrayList<>(keyStates));
-                                    System.out.println("Sending movement: " + targetPlayer.getIp() + keyStates);
-                                } else {
-                                    cPlayermovement.put(i ,targetIp, new ArrayList<>(keyStates));
-                                }
-                            }
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                processKeyStates(isHost ? playerMovement : cPlayermovement, id, targetIp, ids);
                 for(Player player : players){
-                    receivedMovement = retrieveMovement(isHost, id);
+                    receivedMovement = retrieveMovement(isHost ? playerMovement : cPlayermovement, id);
 
                     if( receivedMovement != null && receivedMovement[0].equals(id) && !receivedMovement[1].equals(targetIp)){
                         System.out.println("Received movement: " + receivedMovement[0] + " keyState " + receivedMovement[2]);
@@ -141,15 +125,28 @@ public class GameController {
 
     }
 
-    private Object[] retrieveMovement(boolean isHost, String id) {
+    private void processKeyStates(Space playerMovementSpace, String id, String targetIp, List<String> ids) {
         try {
-            if (isHost) {
-                return playerMovment.getp(new ActualField(id), new FormalField(String.class), new FormalField(List.class));
-            } else {
-                return cPlayermovement.getp(new ActualField(id), new FormalField(String.class), new FormalField(List.class));
+            if (!keyStates.isEmpty()) {
+                for (String i : ids) {
+                    if (!i.equals(id)) {
+                        List<Integer> keys = new ArrayList<>(keyStates);
+                        playerMovementSpace.put(i, targetIp, keys);
+                        System.out.println("Sending movement: " + targetPlayer.getIp() + keyStates);
+                    }
+                }
             }
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            handleException(e);
+        }
+    }
+
+    private Object[] retrieveMovement(Space playerMovementSpace, String id) {
+        try {
+            return playerMovementSpace.getp(new ActualField(id), new FormalField(String.class), new FormalField(List.class));
+        } catch (InterruptedException e) {
+            handleException(e);
+            return null;
         }
     }
 
@@ -172,6 +169,11 @@ public class GameController {
                 }
             }
         }
+    }
+
+    private void handleException(Exception e) {
+        System.err.println("Error: " + e.getMessage());
+        e.printStackTrace();  // Log the stack trace
     }
 
     public void keyDown(KeyEvent e) {
@@ -198,5 +200,4 @@ public class GameController {
             }
         }
     }
-
 }

@@ -24,6 +24,11 @@ public class Client {
     private String id;
     private List<String> ids;
     private RemoteSpace playerMovement;
+
+    private static final String HOST_PORT = "9001";
+    private static final String TCP_PREFIX = "tcp://";
+    private static final String SERVER_IP = "192.168.1.47";
+
     public void client() throws IOException, InterruptedException {
 
         /*
@@ -39,7 +44,7 @@ public class Client {
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             ip = in.readLine();
         }
-        RemoteSpace gameRooms = new RemoteSpace("tcp://192.168.1.47:9001/gameRooms?keep");
+        RemoteSpace gameRooms = new RemoteSpace(TCP_PREFIX + SERVER_IP + ":" + HOST_PORT + "/gameRooms?keep");
         List<Object[]> gRooms = gameRooms.queryAll(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class));
 
         for (Object[] room : gRooms) {

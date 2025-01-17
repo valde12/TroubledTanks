@@ -23,6 +23,11 @@ public class Server{
     private List<String> playerIps;
     private List<String> ids;
 
+    private static final String HOST_PORT = "9001";
+    private static final String TCP_PREFIX = "tcp://";
+    private static final String SERVER_IP = "192.168.1.47";
+    private static final String HOST_IP = "0.0.0.0";
+
     public Server() {
         // Initialize the chatRepository and chat space
         chatRepository = new SpaceRepository();
@@ -42,7 +47,7 @@ public class Server{
 
         repository.add("gameRooms",gameRooms);
 
-        repository.addGate("tcp://0.0.0.0:9001/?keep");
+        repository.addGate( TCP_PREFIX + HOST_IP + ":" + HOST_PORT + "/?keep");
 
     }
 
@@ -50,9 +55,9 @@ public class Server{
         /*
             This part adds the ip that the user wants to host on to the remote space gameRooms
          */
-        RemoteSpace gameRooms = new RemoteSpace("tcp://192.168.1.47:9001/gameRooms?keep");
+        RemoteSpace gameRooms = new RemoteSpace(TCP_PREFIX + SERVER_IP + ":" + HOST_PORT + "/gameRooms?keep");
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        name = name+" is hosting on ";
+        name = name + " is hosting on ";
         try {
             InetAddress address = InetAddress.getLocalHost();
             System.out.println("IP address: " + address.getHostAddress());
@@ -62,12 +67,12 @@ public class Server{
             System.out.println("Enter your ip");
             ip = in.readLine();
         }
-        gameRooms.put(name, ip, "9001");
-        System.out.println("Hosting on " + ip + ":9001");
+        gameRooms.put(name, ip, HOST_PORT);
+        System.out.println("Hosting on " + ip + ":" + HOST_PORT);
 
 
         chatRepository.add("chat",chat);
-        chatRepository.addGate("tcp://"+ip+":9001/?keep");
+        chatRepository.addGate(TCP_PREFIX + ip + ":" + HOST_PORT + "/?keep");
     }
 
 
@@ -83,9 +88,7 @@ public class Server{
             ids.add((String) players[2]);
         }
         boolean isHost = true;
-       /// chatRepository.add("playerMovement", playerMovement);
-       /// chatRepository.addGate("tcp://"+ip+":9002/?keep");
-       /// chat.put("SS");
+
         new GameController(playerIps, ip, isHost, id, ids);
 
 
