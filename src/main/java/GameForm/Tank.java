@@ -25,6 +25,7 @@ public class Tank {
     private Point[] bodyPoints;
     private Point[] barrelPoints;
     private boolean isDead = false;
+    private boolean hasShot = false;
     private List<List<Integer>> mapData = new ArrayList<>();
     
     private List<Projectile> projectiles = new ArrayList<>();
@@ -102,7 +103,10 @@ public class Tank {
         if (keyStates.contains(KeyEvent.VK_S)) movePlayer(-playerSpeed, currentTileSize, mapData);
         if (keyStates.contains(KeyEvent.VK_A)) turnPlayer(5f, currentTileSize, mapData);
         if (keyStates.contains(KeyEvent.VK_D)) turnPlayer(-5f, currentTileSize, mapData);
-        if (keyStates.contains(KeyEvent.VK_SPACE)) shoot();
+        if (keyStates.contains(KeyEvent.VK_SPACE)) {
+            hasShot = true;
+            shoot();
+        };
     }
 
     private void movePlayer(float direction, int tileSize, List<List<Integer>> mapData) {
@@ -288,14 +292,6 @@ public class Tank {
         this.mapData = mapData;
     }
 
-    public float getPlayerAngle(){
-        return this.playerAngle;
-    }
-
-    public void setPlayerAngle(float playerAngle){
-        this.playerAngle = playerAngle;
-    }
-
     public float getPlayerDeltaX(){
         return this.playerDeltaX;
     }
@@ -311,20 +307,43 @@ public class Tank {
     public void setPlayerDeltaY(float deltaY){
         this.playerDeltaY = deltaY;
     }
+
+    public boolean getHasShot() {
+        return hasShot;
+    }
+
+    public void setHasShot(boolean hasShot) {
+        this.hasShot = hasShot;
+    }
+
     public float getPlayerX(){
-        scaleSizes(currentTileSize);
-        return this.playerX;}
+        if (currentTileSize != 0) {
+            return playerX / currentTileSize;
+        } else {
+            return playerX;
+        }
+    }
+
     public float getPlayerY(){
-        scaleSizes(currentTileSize);
-        return this.playerY;}
+        if (currentTileSize != 0) {
+            return playerY / currentTileSize;
+        } else {
+            return playerY;
+        }
+    }
 
     public void setPlayerX(float playerX) {
-        scaleSizes(currentTileSize);
-        this.playerX = playerX;
+        if (currentTileSize != 0) {
+            this.playerX = playerX * currentTileSize;
+        } else {
+            this.playerX = playerX;
+        }
     }
     public void setPlayerY(float playerY) {
-        scaleSizes(currentTileSize);
-        this.playerY = playerY;
-
+        if (currentTileSize != 0) {
+            this.playerY = playerY * currentTileSize;
+        } else {
+            this.playerY = playerY;
+        }
     }
 }
