@@ -79,7 +79,7 @@ public class GameController {
         }
 
         board = new Board(Maps.MAP1, Tanks);  // Load the map and create the player tank
-        gameForm = new GameForm(board);
+        gameForm = new GameForm(board, players);
 
 
         for (Player player : players) {
@@ -195,7 +195,11 @@ public class GameController {
                 if (player.getTank().isHit(projectile.getX(), projectile.getY())) {
                     alivePlayers.remove(player);
                     if (alivePlayers.size() == 1) {
-                        alivePlayers.get(0).winRound();
+                        Player winner = alivePlayers.get(0);
+                        winner.winRound();
+
+                        gameForm.updateScore(winner.getIp(), winner.getScore());
+
                         spawnAllPlayers();
                     }
                 }
