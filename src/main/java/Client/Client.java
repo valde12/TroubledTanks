@@ -100,6 +100,7 @@ public class Client {
         }
         List<Object[]> a = chat.queryAll(new ActualField("Hello From"), new FormalField(String.class), new FormalField(String.class));
         playerIps = new ArrayList<>();
+        ids = new ArrayList<>();
         for (Object[] players : a) {
             playerIps.add((String) players[1]);
             ids.add((String) players[2]);
