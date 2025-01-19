@@ -27,6 +27,7 @@ public class GameController {
     private String playerIP;
     private float playerX;
     private float playerY;
+    private float playerAngle;
     private HashSet<Integer> playerKeyState;
     private Player targetPlayer;
 
@@ -51,6 +52,8 @@ public class GameController {
                 targetPlayer = player;
             }
         }
+        // Optimalt ville man nok lave et space til hver spiller's movement og så have threads til kun at kigge på en spiller's movement
+        // For at undgå alt for stort delay
         if(isHost){
             spaceRepo = new SpaceRepository();
             playerMovement = new SequentialSpace();
@@ -96,6 +99,7 @@ public class GameController {
                         playerIP = (String) receivedMovement[1];
                         playerX = (float) receivedMovement[2];
                         playerY = (float) receivedMovement[3];
+                        playerAngle = (float) receivedMovement[4];
                         /*List<?> receivedList = (List<?>) receivedMovement[2];
                         playerKeyState = new HashSet<>();
                         for (Object key : receivedList) {
@@ -105,7 +109,7 @@ public class GameController {
                         }*/
 
                     }
-                    applyPlayerMovements(player, playerX, playerY);
+                    applyPlayerMovements(player, playerX, playerY, playerAngle);
                 }
                 CheckDeaths();
                 gameForm.repaint();  // Redraw the frame
@@ -134,11 +138,12 @@ public class GameController {
             if (!keyStates.isEmpty()) {
                 float playerX = targetPlayer.getTank().getPlayerX();
                 float playerY = targetPlayer.getTank().getPlayerY();
+                float playerAngle =  targetPlayer.getTank().getPlayerAngle();
                 for (String i : ids) {
                     if (!i.equals(id)) {
                         //List<Integer> keys = new ArrayList<>(keyStates);
-                        playerMovementSpace.put(i, targetIp, playerX, playerY);
-                        System.out.println("Sending movement: " + targetPlayer.getIp());
+                        playerMovementSpace.put(i, targetIp, playerX, playerY, playerAngle);
+                        System.out.println("Sending movement: " + targetPlayer.getIp() + "X = " + playerX + " Y = " + playerY);
                     }
                 }
             }
@@ -151,7 +156,7 @@ public class GameController {
     // TODO: Receive playerX and playerY
     private Object[] retrieveMovement(Space playerMovementSpace, String id) {
         try {
-            return playerMovementSpace.getp(new ActualField(id), new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class) );
+            return playerMovementSpace.getp(new ActualField(id), new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class));
         } catch (InterruptedException e) {
             handleException(e);
             return null;
@@ -160,12 +165,13 @@ public class GameController {
 
 
     // TODO: set to playerX and playerY
-    private void applyPlayerMovements(Player player, float playerX, float playerY) {
+    private void applyPlayerMovements(Player player, float playerX, float playerY, float playerAngle) {
         if (player.getIp().equals(playerIP)) {
             /*player.getTank().keystateCheck(playerKeyState);
             playerKeyState.clear();*/
             player.getTank().setPlayerX(playerX);
             player.getTank().setPlayerY(playerY);
+            player.getTank().setPlayerAngle(playerAngle);
         }
     }
 

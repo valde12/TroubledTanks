@@ -288,20 +288,28 @@ public class Tank {
         this.mapData = mapData;
     }
 
+    public float getPlayerAngle(){
+        return this.playerAngle;
+    }
+
+    public void setPlayerAngle(float playerAngle){
+        this.playerAngle = playerAngle;
+    }
+
     public float getPlayerX(){
         scaleSizes(currentTileSize);
-        return this.playerX / currentTileSize ;}
+        return this.playerX;}
     public float getPlayerY(){
         scaleSizes(currentTileSize);
-        return this.playerY / currentTileSize;}
+        return this.playerY;}
 
     public void setPlayerX(float playerX) {
         scaleSizes(currentTileSize);
-        this.playerX = playerX * currentTileSize;
+        this.playerX = playerX;
     }
     public void setPlayerY(float playerY) {
         scaleSizes(currentTileSize);
-        this.playerY = playerY * currentTileSize;
+        this.playerY = playerY;
 
     }
 }
