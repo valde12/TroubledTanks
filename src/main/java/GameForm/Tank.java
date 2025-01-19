@@ -296,6 +296,21 @@ public class Tank {
         this.playerAngle = playerAngle;
     }
 
+    public float getPlayerDeltaX(){
+        return this.playerDeltaX;
+    }
+
+    public void setPlayerDeltaX(float deltaX){
+        this.playerDeltaX = deltaX;
+    }
+
+    public float getPlayerDeltaY(){
+        return this.playerDeltaY;
+    }
+
+    public void setPlayerDeltaY(float deltaY){
+        this.playerDeltaY = deltaY;
+    }
     public float getPlayerX(){
         scaleSizes(currentTileSize);
         return this.playerX;}
