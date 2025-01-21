@@ -27,7 +27,7 @@ public class Client {
 
     private static final String HOST_PORT = "9001";
     private static final String TCP_PREFIX = "tcp://";
-    private static final String SERVER_IP = "192.168.50.178";
+    private static final String SERVER_IP = "10.209.145.174";
 
     public void client() throws IOException, InterruptedException {
 
@@ -92,8 +92,8 @@ public class Client {
         chat.put("Hello From", ip, id);
         boolean isHost = false;
         while(!start){
-            Object[] t = chat.get(new ActualField("Start"));
-            if(Objects.equals(t[0].toString(), "Start")){
+            Object[] t = chat.getp(new ActualField("Start"));
+            if(t != null  && Objects.equals(t[0].toString(), "Start")){
                 start = true;
                 System.out.println("Start");
             }
