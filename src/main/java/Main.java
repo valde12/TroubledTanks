@@ -5,7 +5,5 @@ public class Main {
 
         //new GameController();
         new StartScreen();
-
-
     }
 }

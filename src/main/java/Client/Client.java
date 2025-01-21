@@ -92,7 +92,7 @@ public class Client {
         chat.put("Hello From", ip, id);
         boolean isHost = false;
         while(!start){
-            Object[] t = chat.getp(new ActualField("Start"));
+            Object[] t = chat.queryp(new ActualField("Start"));
             if(t != null  && Objects.equals(t[0].toString(), "Start")){
                 start = true;
                 System.out.println("Start");
