@@ -346,4 +346,10 @@ public class Tank {
             this.playerY = playerY;
         }
     }
+    public float getPlayerAngle(){
+        return this.playerAngle;
+    }
+    public void setPlayerAngle(float playerAngle){
+        this.playerAngle = playerAngle;
+    }
 }

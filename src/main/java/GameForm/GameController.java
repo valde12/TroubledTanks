@@ -32,6 +32,7 @@ public class GameController {
     private boolean hasShot;
     private HashSet<Integer> playerKeyState;
     private Player targetPlayer;
+    private float playerAngle;
 
     private static final String MOVEMENT_PORT = "9002";
     private static final String TCP_PREFIX = "tcp://";
@@ -103,7 +104,8 @@ public class GameController {
                         playerY = (float) receivedMovement[3];
                         playerDeltaX = (float) receivedMovement[4];
                         playerDeltaY = (float) receivedMovement[5];
-                        hasShot = (boolean) receivedMovement[6];
+                        playerAngle = (float) receivedMovement[6];
+                        hasShot = (boolean) receivedMovement[7];
                         /*List<?> receivedList = (List<?>) receivedMovement[2];
                         playerKeyState = new HashSet<>();
                         for (Object key : receivedList) {
@@ -113,7 +115,7 @@ public class GameController {
                         }*/
 
                     }
-                    applyPlayerMovements(player, playerX, playerY, playerDeltaX, playerDeltaY, hasShot);
+                    applyPlayerMovements(player, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
                 }
                 CheckDeaths();
                 gameForm.repaint();  // Redraw the frame
@@ -144,13 +146,14 @@ public class GameController {
                 float playerY = targetPlayer.getTank().getPlayerY();
                 float playerDeltaX = targetPlayer.getTank().getPlayerDeltaX();
                 float playerDeltaY = targetPlayer.getTank().getPlayerDeltaY();
+                float playerAngle = targetPlayer.getTank().getPlayerAngle();
                 boolean hasShot = targetPlayer.getTank().getHasShot();
                 targetPlayer.getTank().setHasShot(false);
 
                 for (String i : ids) {
                     if (!i.equals(id)) {
                         //List<Integer> keys = new ArrayList<>(keyStates);
-                        playerMovementSpace.put(i, targetIp, playerX, playerY, playerDeltaX, playerDeltaY, hasShot);
+                        playerMovementSpace.put(i, targetIp, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
                         System.out.println("Sending movement: " + targetPlayer.getIp() + "X = " + playerX + " Y = " + playerY + "ANGLE" + "Delta X = " + playerDeltaX + "Delta Y = " + playerDeltaY);
                     }
                 }
@@ -164,7 +167,7 @@ public class GameController {
     // TODO: Receive playerX and playerY
     private Object[] retrieveMovement(Space playerMovementSpace, String id) {
         try {
-            return playerMovementSpace.getp(new ActualField(id), new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Boolean.class));
+            return playerMovementSpace.getp(new ActualField(id), new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class),new FormalField(Float.class), new FormalField(Boolean.class));
         } catch (InterruptedException e) {
             handleException(e);
             return null;
@@ -173,7 +176,7 @@ public class GameController {
 
 
     // TODO: set to playerX and playerY
-    private void applyPlayerMovements(Player player, float playerX, float playerY, float playerDeltaX, float playerDeltaY, boolean hasShot) {
+    private void applyPlayerMovements(Player player, float playerX, float playerY, float playerDeltaX, float playerDeltaY, float playerAngle, boolean hasShot) {
         if (player.getIp().equals(playerIP)) {
             /*player.getTank().keystateCheck(playerKeyState);
             playerKeyState.clear();*/
@@ -183,6 +186,7 @@ public class GameController {
             playerTank.setPlayerY(playerY);
             playerTank.setPlayerDeltaX(playerDeltaX);
             playerTank.setPlayerDeltaY(playerDeltaY);
+            playerTank.setPlayerAngle(playerAngle);
             if (hasShot) {
                 playerTank.shoot();
             }
