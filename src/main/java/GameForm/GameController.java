@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GameController {
 
@@ -33,6 +35,8 @@ public class GameController {
     private HashSet<Integer> playerKeyState;
     private Player targetPlayer;
     private float playerAngle;
+    private ExecutorService networkThreadPool;
+
 
     private static final String MOVEMENT_PORT = "9002";
     private static final String TCP_PREFIX = "tcp://";
@@ -41,6 +45,8 @@ public class GameController {
         players = new ArrayList<>();
         TankColor[] colors = TankColor.values();
         alivePlayers = new ArrayList<>();
+        networkThreadPool = Executors.newFixedThreadPool(2);
+
 
         int i =0;
 
@@ -93,32 +99,6 @@ public class GameController {
             public void run() {
                 board.update();
                 targetPlayer.getTank().keystateCheck(keyStates);
-                /*targetPlayer.getTank().keystateCheck(keyStates);
-                processKeyStates(isHost ? playerMovement : cPlayermovement, id, targetIp, ids);
-                for(Player player : players){
-                    receivedMovement = retrieveMovement(isHost ? playerMovement : cPlayermovement, id);
-
-                    if( receivedMovement != null && receivedMovement[0].equals(id) && !receivedMovement[1].equals(targetIp)){
-                        //System.out.println("Received movement: " + receivedMovement[0] + " Player X = " + receivedMovement[2] + "Player Y = " + receivedMovement[3]);
-                        playerIP = (String) receivedMovement[1];
-                        playerX = (float) receivedMovement[2];
-                        playerY = (float) receivedMovement[3];
-                        playerDeltaX = (float) receivedMovement[4];
-                        playerDeltaY = (float) receivedMovement[5];
-                        playerAngle = (float) receivedMovement[6];
-                        hasShot = (boolean) receivedMovement[7];
-                        /*List<?> receivedList = (List<?>) receivedMovement[2];
-                        playerKeyState = new HashSet<>();
-                        for (Object key : receivedList) {
-                            if (key instanceof Number) {
-                                playerKeyState.add(((Number) key).intValue());
-                            }
-                        }
-
-                    }
-                    applyPlayerMovements(player, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
-                }*/
-                CheckDeaths();
                 gameForm.repaint();  // Redraw the frame
             }
         }, 0, 16);// Approx. 60 FPS
@@ -126,40 +106,14 @@ public class GameController {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
+                processKeyStatesAsync(isHost ? playerMovement : cPlayermovement, id, targetIp, ids);
                 for(Player player : players){
-                    receivedMovement = retrieveMovement(isHost ? playerMovement : cPlayermovement, id);
-
-                    if( receivedMovement != null && receivedMovement[0].equals(id) && !receivedMovement[1].equals(targetIp)){
-                        //System.out.println("Received movement: " + receivedMovement[0] + " Player X = " + receivedMovement[2] + "Player Y = " + receivedMovement[3]);
-                        playerIP = (String) receivedMovement[1];
-                        playerX = (float) receivedMovement[2];
-                        playerY = (float) receivedMovement[3];
-                        playerDeltaX = (float) receivedMovement[4];
-                        playerDeltaY = (float) receivedMovement[5];
-                        playerAngle = (float) receivedMovement[6];
-                        hasShot = (boolean) receivedMovement[7];
-                        /*List<?> receivedList = (List<?>) receivedMovement[2];
-                        playerKeyState = new HashSet<>();
-                        for (Object key : receivedList) {
-                            if (key instanceof Number) {
-                                playerKeyState.add(((Number) key).intValue());
-                            }
-                        }*/
-
-                    }
-                    applyPlayerMovements(player, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
+                    retrieveMovementAsync(isHost ? playerMovement : cPlayermovement, id, player, targetIp);
                 }
+                CheckDeaths();
             }
+        }, 0, 32);// Approx. 60 FPS
 
-        }, 0, 32);
-
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                processKeyStates(isHost ? playerMovement : cPlayermovement, id, targetIp, ids);
-            }
-
-        }, 0, 64);
         // Add key listener
         gameForm.addKeyListener(new KeyAdapter() {
             @Override
@@ -177,37 +131,55 @@ public class GameController {
 
 
     // TODO: Send playerX and playerY
-    private void processKeyStates(Space playerMovementSpace, String id, String targetIp, List<String> ids) {
-        try {
-            float playerX = targetPlayer.getTank().getPlayerX();
-            float playerY = targetPlayer.getTank().getPlayerY();
-            float playerDeltaX = targetPlayer.getTank().getPlayerDeltaX();
-            float playerDeltaY = targetPlayer.getTank().getPlayerDeltaY();
-            float playerAngle = targetPlayer.getTank().getPlayerAngle();
-            boolean hasShot = targetPlayer.getTank().getHasShot();
-            targetPlayer.getTank().setHasShot(false);
+    private void processKeyStatesAsync(Space playerMovementSpace, String id, String targetIp, List<String> ids) {
+        networkThreadPool.submit(() -> {
+            try {
+                float playerX = targetPlayer.getTank().getPlayerX();
+                float playerY = targetPlayer.getTank().getPlayerY();
+                float playerDeltaX = targetPlayer.getTank().getPlayerDeltaX();
+                float playerDeltaY = targetPlayer.getTank().getPlayerDeltaY();
+                float playerAngle = targetPlayer.getTank().getPlayerAngle();
+                boolean hasShot = targetPlayer.getTank().getHasShot();
+                targetPlayer.getTank().setHasShot(false);
 
-            for (String i : ids) {
-                if (!i.equals(id)) {
-                    //List<Integer> keys = new ArrayList<>(keyStates);
-                    playerMovementSpace.put(i, targetIp, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
-                    //System.out.println("Sending movement: " + targetPlayer.getIp() + "X = " + playerX + " Y = " + playerY + "ANGLE" + "Delta X = " + playerDeltaX + "Delta Y = " + playerDeltaY);
+                for (String i : ids) {
+                    if (!i.equals(id)) {
+                        //List<Integer> keys = new ArrayList<>(keyStates);
+                        playerMovementSpace.put(i, targetIp, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
+                        //System.out.println("Sending movement: " + targetPlayer.getIp() + "X = " + playerX + " Y = " + playerY + "ANGLE" + "Delta X = " + playerDeltaX + "Delta Y = " + playerDeltaY);
+                    }
                 }
+            } catch (InterruptedException e) {
+                handleException(e);
             }
-        } catch (InterruptedException e) {
-            handleException(e);
-        }
+        });
     }
 
 
     // TODO: Receive playerX and playerY
-    private Object[] retrieveMovement(Space playerMovementSpace, String id) {
-        try {
-            return playerMovementSpace.queryp(new ActualField(id), new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class),new FormalField(Float.class), new FormalField(Boolean.class));
-        } catch (InterruptedException e) {
-            handleException(e);
-            return null;
-        }
+    private void retrieveMovementAsync(Space playerMovementSpace, String id, Player player, String targetIp) {
+        networkThreadPool.submit(() -> {
+            try {
+                Object[] receivedMovement = playerMovementSpace.queryp(new ActualField(id), new FormalField(String.class),
+                        new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class),
+                        new FormalField(Float.class), new FormalField(Float.class), new FormalField(Boolean.class));
+                // Apply player movement if received
+                if( receivedMovement != null && receivedMovement[0].equals(id) && !receivedMovement[1].equals(targetIp)){
+                    playerIP = (String) receivedMovement[1];
+                    playerX = (float) receivedMovement[2];
+                    playerY = (float) receivedMovement[3];
+                    playerDeltaX = (float) receivedMovement[4];
+                    playerDeltaY = (float) receivedMovement[5];
+                    playerAngle = (float) receivedMovement[6];
+                    hasShot = (boolean) receivedMovement[7];
+
+                }
+                applyPlayerMovements(player, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
+            } catch (InterruptedException e) {
+                handleException(e);
+            }
+        });
+
     }
 
 
