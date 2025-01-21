@@ -15,6 +15,7 @@ public class Player {
     public Tank getTank() {
         return tank;
     }
+    public void setTank(Tank tank){this.tank = tank; }
 
     public int getScore() {
         return score;
