@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 public class GameController {
 
@@ -44,16 +45,14 @@ public class GameController {
 
         int i =0;
 
-        for(String ip : ips){
+        for (String ip : ips) {
             TankColor color = colors[i];
-            Player player = new Player(color, ip, (i +1)*100f, (i+1)*100f);
+            Player player = new Player(color, ip, (i + 1) * 100f, (i + 1) * 100f);
             players.add(player);
-            i++;
-        }
-        for(Player player : players){
-            if(player.getIp().equals(targetIp)){
+            if (ip.equals(targetIp)) {
                 targetPlayer = player;
             }
+            i++;
         }
         // Optimalt ville man nok lave et space til hver spiller's movement og så have threads til kun at kigge på en spiller's movement
         // For at undgå alt for stort delay
@@ -74,10 +73,9 @@ public class GameController {
 
         timer = new Timer();
 
-        List<Tank> Tanks = new ArrayList<>();
-        for (Player player : players) {
-            Tanks.add(player.getTank());
-        }
+        List<Tank> Tanks = players.stream()
+                .map(Player::getTank)
+                .collect(Collectors.toList());
 
         board = new Board(Maps.MAP1, Tanks);  // Load the map and create the player tank
         gameForm = new GameForm(board, players);
@@ -93,8 +91,7 @@ public class GameController {
             public void run() {
                 board.update();
                 targetPlayer.getTank().keystateCheck(keyStates);
-                /*targetPlayer.getTank().keystateCheck(keyStates);
-                processKeyStates(isHost ? playerMovement : cPlayermovement, id, targetIp, ids);
+                /*processKeyStates(isHost ? playerMovement : cPlayermovement, id, targetIp, ids);
                 for(Player player : players){
                     receivedMovement = retrieveMovement(isHost ? playerMovement : cPlayermovement, id);
 
@@ -145,18 +142,16 @@ public class GameController {
                                 playerKeyState.add(((Number) key).intValue());
                             }
                         }*/
-
+                        applyPlayerMovements(player, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
                     }
-                    applyPlayerMovements(player, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
                 }
             }
-
         }, 0, 32);
 
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                processKeyStates(isHost ? playerMovement : cPlayermovement, id, targetIp, ids);
+                processKeyStates(isHost ? playerMovement : cPlayermovement, targetIp);
             }
 
         }, 0, 64);
@@ -177,7 +172,7 @@ public class GameController {
 
 
     // TODO: Send playerX and playerY
-    private void processKeyStates(Space playerMovementSpace, String id, String targetIp, List<String> ids) {
+    private void processKeyStates(Space playerMovementSpace, String targetIp) {
         try {
                 float playerX = targetPlayer.getTank().getPlayerX();
                 float playerY = targetPlayer.getTank().getPlayerY();
@@ -187,13 +182,9 @@ public class GameController {
                 boolean hasShot = targetPlayer.getTank().getHasShot();
                 targetPlayer.getTank().setHasShot(false);
 
-                for (String i : ids) {
-                    if (!i.equals(id)) {
                         //List<Integer> keys = new ArrayList<>(keyStates);
-                        playerMovementSpace.put(i, targetIp, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
+                playerMovementSpace.put(targetIp, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
                         //System.out.println("Sending movement: " + targetPlayer.getIp() + "X = " + playerX + " Y = " + playerY + "ANGLE" + "Delta X = " + playerDeltaX + "Delta Y = " + playerDeltaY);
-                    }
-                }
         } catch (InterruptedException e) {
             handleException(e);
         }
@@ -203,7 +194,7 @@ public class GameController {
     // TODO: Receive playerX and playerY
     private Object[] retrieveMovement(Space playerMovementSpace, String id) {
         try {
-            return playerMovementSpace.queryp(new ActualField(id), new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class),new FormalField(Float.class), new FormalField(Boolean.class));
+            return playerMovementSpace.queryp(new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class),new FormalField(Float.class), new FormalField(Boolean.class));
         } catch (InterruptedException e) {
             handleException(e);
             return null;
