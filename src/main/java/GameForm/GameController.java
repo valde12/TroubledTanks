@@ -92,6 +92,7 @@ public class GameController {
             @Override
             public void run() {
                 board.update();
+                targetPlayer.getTank().keystateCheck(keyStates);
                 /*targetPlayer.getTank().keystateCheck(keyStates);
                 processKeyStates(isHost ? playerMovement : cPlayermovement, id, targetIp, ids);
                 for(Player player : players){
@@ -155,7 +156,6 @@ public class GameController {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                targetPlayer.getTank().keystateCheck(keyStates);
                 processKeyStates(isHost ? playerMovement : cPlayermovement, id, targetIp, ids);
             }
 
