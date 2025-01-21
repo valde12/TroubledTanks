@@ -25,7 +25,6 @@ public class GameController {
     private Object[] receivedMovement;
 
     private String playerIP;
-    private Tank tank;
     private float playerX;
     private float playerY;
     private float playerDeltaX;
@@ -139,7 +138,6 @@ public class GameController {
                         playerDeltaY = (float) receivedMovement[5];
                         playerAngle = (float) receivedMovement[6];
                         hasShot = (boolean) receivedMovement[7];
-                        tank =(Tank) receivedMovement[8];
                         /*List<?> receivedList = (List<?>) receivedMovement[2];
                         playerKeyState = new HashSet<>();
                         for (Object key : receivedList) {
@@ -149,7 +147,7 @@ public class GameController {
                         }*/
 
                     }
-                    applyPlayerMovements(player, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot, tank);
+                    applyPlayerMovements(player, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
                 }
             }
 
@@ -188,12 +186,11 @@ public class GameController {
             float playerAngle = targetPlayer.getTank().getPlayerAngle();
             boolean hasShot = targetPlayer.getTank().getHasShot();
             targetPlayer.getTank().setHasShot(false);
-            Tank tank = targetPlayer.getTank();
 
             for (String i : ids) {
                 if (!i.equals(id)) {
                     //List<Integer> keys = new ArrayList<>(keyStates);
-                    playerMovementSpace.put(i, targetIp, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot, tank);
+                    playerMovementSpace.put(i, targetIp, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
                     //System.out.println("Sending movement: " + targetPlayer.getIp() + "X = " + playerX + " Y = " + playerY + "ANGLE" + "Delta X = " + playerDeltaX + "Delta Y = " + playerDeltaY);
                 }
             }
@@ -206,7 +203,7 @@ public class GameController {
     // TODO: Receive playerX and playerY
     private Object[] retrieveMovement(Space playerMovementSpace, String id) {
         try {
-            return playerMovementSpace.queryp(new ActualField(id), new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class),new FormalField(Float.class), new FormalField(Boolean.class), new FormalField(Tank.class));
+            return playerMovementSpace.queryp(new ActualField(id), new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class),new FormalField(Float.class), new FormalField(Boolean.class));
         } catch (InterruptedException e) {
             handleException(e);
             return null;
@@ -215,20 +212,20 @@ public class GameController {
 
 
     // TODO: set to playerX and playerY
-    private void applyPlayerMovements(Player player, float playerX, float playerY, float playerDeltaX, float playerDeltaY, float playerAngle, boolean hasShot, Tank tank) {
+    private void applyPlayerMovements(Player player, float playerX, float playerY, float playerDeltaX, float playerDeltaY, float playerAngle, boolean hasShot) {
         if (player.getIp().equals(playerIP)) {
             /*player.getTank().keystateCheck(playerKeyState);
             playerKeyState.clear();*/
             Tank playerTank = player.getTank();
-            playerTank = tank;
-            /*playerTank.setPlayerX(playerX);
+
+            playerTank.setPlayerX(playerX);
             playerTank.setPlayerY(playerY);
             playerTank.setPlayerDeltaX(playerDeltaX);
             playerTank.setPlayerDeltaY(playerDeltaY);
             playerTank.setPlayerAngle(playerAngle);
             if (hasShot) {
                 playerTank.shoot();
-            }*/
+            }
         }
     }
 
