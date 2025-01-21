@@ -92,13 +92,46 @@ public class GameController {
             @Override
             public void run() {
                 board.update();
+                /*targetPlayer.getTank().keystateCheck(keyStates);
+                processKeyStates(isHost ? playerMovement : cPlayermovement, id, targetIp, ids);
+                for(Player player : players){
+                    receivedMovement = retrieveMovement(isHost ? playerMovement : cPlayermovement, id);
+
+                    if( receivedMovement != null && receivedMovement[0].equals(id) && !receivedMovement[1].equals(targetIp)){
+                        //System.out.println("Received movement: " + receivedMovement[0] + " Player X = " + receivedMovement[2] + "Player Y = " + receivedMovement[3]);
+                        playerIP = (String) receivedMovement[1];
+                        playerX = (float) receivedMovement[2];
+                        playerY = (float) receivedMovement[3];
+                        playerDeltaX = (float) receivedMovement[4];
+                        playerDeltaY = (float) receivedMovement[5];
+                        playerAngle = (float) receivedMovement[6];
+                        hasShot = (boolean) receivedMovement[7];
+                        /*List<?> receivedList = (List<?>) receivedMovement[2];
+                        playerKeyState = new HashSet<>();
+                        for (Object key : receivedList) {
+                            if (key instanceof Number) {
+                                playerKeyState.add(((Number) key).intValue());
+                            }
+                        }
+
+                    }
+                    applyPlayerMovements(player, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
+                }*/
+                CheckDeaths();
+                gameForm.repaint();  // Redraw the frame
+            }
+        }, 0, 16);// Approx. 60 FPS
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
                 targetPlayer.getTank().keystateCheck(keyStates);
                 processKeyStates(isHost ? playerMovement : cPlayermovement, id, targetIp, ids);
                 for(Player player : players){
                     receivedMovement = retrieveMovement(isHost ? playerMovement : cPlayermovement, id);
 
                     if( receivedMovement != null && receivedMovement[0].equals(id) && !receivedMovement[1].equals(targetIp)){
-                        System.out.println("Received movement: " + receivedMovement[0] + " Player X = " + receivedMovement[2] + "Player Y = " + receivedMovement[3]);
+                        //System.out.println("Received movement: " + receivedMovement[0] + " Player X = " + receivedMovement[2] + "Player Y = " + receivedMovement[3]);
                         playerIP = (String) receivedMovement[1];
                         playerX = (float) receivedMovement[2];
                         playerY = (float) receivedMovement[3];
@@ -117,11 +150,9 @@ public class GameController {
                     }
                     applyPlayerMovements(player, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
                 }
-                CheckDeaths();
-                gameForm.repaint();  // Redraw the frame
             }
-        }, 0, 16);// Approx. 60 FPS
 
+        }, 0, 32);
         // Add key listener
         gameForm.addKeyListener(new KeyAdapter() {
             @Override
@@ -154,7 +185,7 @@ public class GameController {
                     if (!i.equals(id)) {
                         //List<Integer> keys = new ArrayList<>(keyStates);
                         playerMovementSpace.put(i, targetIp, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
-                        System.out.println("Sending movement: " + targetPlayer.getIp() + "X = " + playerX + " Y = " + playerY + "ANGLE" + "Delta X = " + playerDeltaX + "Delta Y = " + playerDeltaY);
+                        //System.out.println("Sending movement: " + targetPlayer.getIp() + "X = " + playerX + " Y = " + playerY + "ANGLE" + "Delta X = " + playerDeltaX + "Delta Y = " + playerDeltaY);
                     }
                 }
             }
