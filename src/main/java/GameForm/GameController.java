@@ -59,7 +59,7 @@ public class GameController {
         // For at undgå alt for stort delay
         if(isHost){
             spaceRepo = new SpaceRepository();
-            playerMovement = new SequentialSpace();
+            playerMovement = new PileSpace();
             spaceRepo.add("playerMovement", playerMovement);
             spaceRepo.addGate(TCP_PREFIX + targetIp + ":" + MOVEMENT_PORT + "/?keep");
         } else {
@@ -167,7 +167,7 @@ public class GameController {
     // TODO: Receive playerX and playerY
     private Object[] retrieveMovement(Space playerMovementSpace, String id) {
         try {
-            return playerMovementSpace.getp(new ActualField(id), new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class),new FormalField(Float.class), new FormalField(Boolean.class));
+            return playerMovementSpace.queryp(new ActualField(id), new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class),new FormalField(Float.class), new FormalField(Boolean.class));
         } catch (InterruptedException e) {
             handleException(e);
             return null;
