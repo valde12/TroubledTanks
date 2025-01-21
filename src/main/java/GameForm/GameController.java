@@ -125,8 +125,6 @@ public class GameController {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                targetPlayer.getTank().keystateCheck(keyStates);
-                processKeyStates(isHost ? playerMovement : cPlayermovement, id, targetIp, ids);
                 for(Player player : players){
                     receivedMovement = retrieveMovement(isHost ? playerMovement : cPlayermovement, id);
 
@@ -153,6 +151,15 @@ public class GameController {
             }
 
         }, 0, 32);
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                targetPlayer.getTank().keystateCheck(keyStates);
+                processKeyStates(isHost ? playerMovement : cPlayermovement, id, targetIp, ids);
+            }
+
+        }, 0, 64);
         // Add key listener
         gameForm.addKeyListener(new KeyAdapter() {
             @Override
@@ -172,7 +179,6 @@ public class GameController {
     // TODO: Send playerX and playerY
     private void processKeyStates(Space playerMovementSpace, String id, String targetIp, List<String> ids) {
         try {
-            if (!keyStates.isEmpty()) {
                 float playerX = targetPlayer.getTank().getPlayerX();
                 float playerY = targetPlayer.getTank().getPlayerY();
                 float playerDeltaX = targetPlayer.getTank().getPlayerDeltaX();
@@ -188,7 +194,6 @@ public class GameController {
                         //System.out.println("Sending movement: " + targetPlayer.getIp() + "X = " + playerX + " Y = " + playerY + "ANGLE" + "Delta X = " + playerDeltaX + "Delta Y = " + playerDeltaY);
                     }
                 }
-            }
         } catch (InterruptedException e) {
             handleException(e);
         }
