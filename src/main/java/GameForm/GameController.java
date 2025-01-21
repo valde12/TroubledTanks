@@ -214,8 +214,7 @@ public class GameController {
     // TODO: set to playerX and playerY
     private void applyPlayerMovements(Player player, float playerX, float playerY, float playerDeltaX, float playerDeltaY, float playerAngle, boolean hasShot) {
         if (player.getIp().equals(playerIP)) {
-            /*player.getTank().keystateCheck(playerKeyState);
-            playerKeyState.clear();*/
+
             Tank playerTank = player.getTank();
 
             playerTank.setPlayerX(playerX);
