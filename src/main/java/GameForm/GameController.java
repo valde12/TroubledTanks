@@ -73,9 +73,10 @@ public class GameController {
 
         timer = new Timer();
 
-        List<Tank> Tanks = players.stream()
-                .map(Player::getTank)
-                .collect(Collectors.toList());
+        List<Tank> Tanks = new ArrayList<>();
+        for (Player player : players) {
+            Tanks.add(player.getTank());
+        }
 
         board = new Board(Maps.MAP1, Tanks);  // Load the map and create the player tank
         gameForm = new GameForm(board, players);
@@ -124,7 +125,7 @@ public class GameController {
             @Override
             public void run() {
                 for(Player player : players){
-                    receivedMovement = retrieveMovement(isHost ? playerMovement : cPlayermovement, id);
+                    receivedMovement = retrieveMovement(isHost ? playerMovement : cPlayermovement);
 
                     if( receivedMovement != null && receivedMovement[0].equals(id) && !receivedMovement[1].equals(targetIp)){
                         //System.out.println("Received movement: " + receivedMovement[0] + " Player X = " + receivedMovement[2] + "Player Y = " + receivedMovement[3]);
@@ -142,8 +143,8 @@ public class GameController {
                                 playerKeyState.add(((Number) key).intValue());
                             }
                         }*/
-                        applyPlayerMovements(player, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
                     }
+                    applyPlayerMovements(player, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
                 }
             }
         }, 0, 32);
@@ -192,7 +193,7 @@ public class GameController {
 
 
     // TODO: Receive playerX and playerY
-    private Object[] retrieveMovement(Space playerMovementSpace, String id) {
+    private Object[] retrieveMovement(Space playerMovementSpace) {
         try {
             return playerMovementSpace.queryp(new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class), new FormalField(Float.class),new FormalField(Float.class), new FormalField(Boolean.class));
         } catch (InterruptedException e) {
