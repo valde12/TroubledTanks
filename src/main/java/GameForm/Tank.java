@@ -250,6 +250,7 @@ public class Tank {
         playerAngle = 0f;
         playerDeltaX = 1f;
         playerDeltaY = 0f;
+        projectiles.clear();
         isDead = false;
     }
 
