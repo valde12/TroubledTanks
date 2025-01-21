@@ -167,6 +167,7 @@ public class GameController {
                 keyDown(e);
             }
 
+
             @Override
             public void keyReleased(KeyEvent e) {
                 keyUp(e);
