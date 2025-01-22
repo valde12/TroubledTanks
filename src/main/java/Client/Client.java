@@ -27,6 +27,7 @@ public class Client {
 
     private static final String HOST_PORT = "9001";
     private static final String TCP_PREFIX = "tcp://";
+    // TODO: Must be changed to the Server's IPv4 Address
     private static final String SERVER_IP = "10.209.145.174";
 
     public void client() throws IOException, InterruptedException {
