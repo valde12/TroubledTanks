@@ -130,7 +130,7 @@ public class GameController {
     }
 
 
-    // TODO: Send playerX and playerY
+
     private void processKeyStatesAsync(Space playerMovementSpace, String id, String targetIp, List<String> ids) {
         networkThreadPool.submit(() -> {
             try {
@@ -154,7 +154,7 @@ public class GameController {
     }
 
 
-    // TODO: Receive playerX and playerY
+
     private void retrieveMovementAsync(Space playerMovementSpace, String id, Player player, String targetIp) {
         networkThreadPool.submit(() -> {
             try {
@@ -181,7 +181,6 @@ public class GameController {
     }
 
 
-    // TODO: set to playerX and playerY
     private void applyPlayerMovements(Player player, float playerX, float playerY, float playerDeltaX, float playerDeltaY, float playerAngle, boolean hasShot) {
         if (player.getIp().equals(playerIP)) {
             Tank playerTank = player.getTank();
