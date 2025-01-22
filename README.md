@@ -6,9 +6,27 @@ There's a method en Server.Java called Server() it is important that it is run
 on a separate computer
 and that you know the IPv4 Address of that computer that runs it
 
-```
-THIS IS A CODE FIELD
+```Java
+public void Server () {
 
+        SpaceRepository repository = new SpaceRepository();
+
+        SequentialSpace gameRooms = new SequentialSpace();
+
+        repository.add("gameRooms",gameRooms);
+
+        repository.addGate( TCP_PREFIX + HOST_IP + ":" + HOST_PORT + "/?keep");
+        System.out.println("Server started and waiting for connections...");
+
+        synchronized (this) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                System.err.println("Server interrupted: " + e.getMessage());
+            }
+        }
+        System.out.println("Server stopping...");
+}
 ```
 
 
