@@ -34,6 +34,19 @@ public class Client {
         /*
             This part queries all the ip's and ports from the remote space gameRooms and lists them out
          */
+        getIp();
+        RemoteSpace gameRooms = new RemoteSpace(TCP_PREFIX + SERVER_IP + ":" + HOST_PORT + "/gameRooms?keep");
+        List<Object[]> gRooms = gameRooms.queryAll(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class));
+
+        for (Object[] room : gRooms) {
+            System.out.println(room[0] + " "  + room[1] + ":" + room[2]);
+        }
+
+        JFrame frame = createGameRoomSelectionFrame(gRooms);
+        frame.setVisible(true);
+    }
+
+    private void getIp() throws IOException {
         try {
             InetAddress address = InetAddress.getLocalHost();
             System.out.println("IP address: " + address.getHostAddress());
@@ -44,13 +57,9 @@ public class Client {
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             ip = in.readLine();
         }
-        RemoteSpace gameRooms = new RemoteSpace(TCP_PREFIX + SERVER_IP + ":" + HOST_PORT + "/gameRooms?keep");
-        List<Object[]> gRooms = gameRooms.queryAll(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class));
+    }
 
-        for (Object[] room : gRooms) {
-            System.out.println(room[0] + " "  + room[1] + ":" + room[2]);
-        }
-
+    private JFrame createGameRoomSelectionFrame(List<Object[]> gRooms) {
         JFrame frame = new JFrame("Choose a Game Room");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 300);
@@ -82,7 +91,7 @@ public class Client {
             }
         });
         frame.add(joinButton, BorderLayout.SOUTH);
-        frame.setVisible(true);
+        return frame;
     }
 
     public void joinGame(String selectedRoom) throws IOException, InterruptedException {

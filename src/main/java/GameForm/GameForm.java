@@ -15,7 +15,7 @@ public class GameForm extends JFrame {
     public GameForm(Board board, List<Player> players) {
         super("Tank Trouble");  // Set the window title
 
-        setSize(800, 600);  // Set initial size for the frame
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
 

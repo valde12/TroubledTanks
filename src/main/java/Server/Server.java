@@ -48,6 +48,17 @@ public class Server{
         repository.add("gameRooms",gameRooms);
 
         repository.addGate( TCP_PREFIX + HOST_IP + ":" + HOST_PORT + "/?keep");
+        System.out.println("Server started and waiting for connections...");
+
+        synchronized (this) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                System.err.println("Server interrupted: " + e.getMessage());
+            }
+        }
+
+        System.out.println("Server stopping...");
 
     }
 
@@ -81,7 +92,6 @@ public class Server{
         id = String.valueOf(c.size());
         chat.put("Hello From", ip, id);
         chat.put("Start");
-        //chatRepository.closeGate("tcp://"+ip+":9001/?keep");'
         List<Object[]> a = chat.queryAll(new ActualField("Hello From"), new FormalField(String.class) , new FormalField(String.class));
         for (Object[] players : a) {
             playerIps.add((String) players[1]);

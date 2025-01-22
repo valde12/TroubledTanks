@@ -50,19 +50,20 @@ public class GameController {
 
         int i =0;
 
+        // initialize players
         for(String ip : ips){
             TankColor color = colors[i];
             Player player = new Player(color, ip, (i +1)*100f, (i+1)*100f);
             players.add(player);
             i++;
         }
+        // find target player
         for(Player player : players){
             if(player.getIp().equals(targetIp)){
                 targetPlayer = player;
             }
         }
-        // Optimalt ville man nok lave et space til hver spiller's movement og så have threads til kun at kigge på en spiller's movement
-        // For at undgå alt for stort delay
+        // Set up networking and space repository if host
         if(isHost){
             spaceRepo = new SpaceRepository();
             playerMovement = new PileSpace();
@@ -76,45 +77,44 @@ public class GameController {
             cPlayermovement = new RemoteSpace(TCP_PREFIX + hostIp + ":" + MOVEMENT_PORT + "/playerMovement?keep");
         }
 
+        // Spawn all players on map and initialize tank
         spawnAllPlayers();
-
-        timer = new Timer();
-
         List<Tank> Tanks = new ArrayList<>();
         for (Player player : players) {
             Tanks.add(player.getTank());
         }
 
-        board = new Board(Maps.MAP1, Tanks);  // Load the map and create the player tank
+        // initialize board, gameform and set map data for all tanks
+        board = new Board(Maps.MAP1, Tanks);
         gameForm = new GameForm(board, players);
-
-
         for (Player player : players) {
             player.getTank().setMapData(board.getMapData());
         }
-        // Timer setup for game loop
 
+        // Timer setup for game loop
+        timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 board.update();
                 targetPlayer.getTank().keystateCheck(keyStates);
-                gameForm.repaint();  // Redraw the frame
+                gameForm.repaint();
             }
         }, 0, 16);// Approx. 60 FPS
 
+        Space movementSpace = isHost ? playerMovement : cPlayermovement;
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                processKeyStatesAsync(isHost ? playerMovement : cPlayermovement, id, targetIp, ids);
+                processKeyStatesAsync(movementSpace, id, targetIp, ids);
                 for(Player player : players){
-                    retrieveMovementAsync(isHost ? playerMovement : cPlayermovement, id, player, targetIp);
+                    retrieveMovementAsync(movementSpace, id, player, targetIp);
                 }
                 CheckDeaths();
             }
         }, 0, 32);// Approx. 60 FPS
 
-        // Add key listener
+        // Add key listener for handling game inputs
         gameForm.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -144,9 +144,7 @@ public class GameController {
 
                 for (String i : ids) {
                     if (!i.equals(id)) {
-                        //List<Integer> keys = new ArrayList<>(keyStates);
                         playerMovementSpace.put(i, targetIp, playerX, playerY, playerDeltaX, playerDeltaY, playerAngle, hasShot);
-                        //System.out.println("Sending movement: " + targetPlayer.getIp() + "X = " + playerX + " Y = " + playerY + "ANGLE" + "Delta X = " + playerDeltaX + "Delta Y = " + playerDeltaY);
                     }
                 }
             } catch (InterruptedException e) {
@@ -186,8 +184,6 @@ public class GameController {
     // TODO: set to playerX and playerY
     private void applyPlayerMovements(Player player, float playerX, float playerY, float playerDeltaX, float playerDeltaY, float playerAngle, boolean hasShot) {
         if (player.getIp().equals(playerIP)) {
-            /*player.getTank().keystateCheck(playerKeyState);
-            playerKeyState.clear();*/
             Tank playerTank = player.getTank();
 
             playerTank.setPlayerX(playerX);
