@@ -1,5 +1,8 @@
 This game is Trouble Tanks
 
+To be able to run this program you need to hava JSpaces installed
+(https://github.com/pSpaces/jSpace/blob/master/docs/getting_started.md)
+
 There's a method in Server.Java called Server() it is important that it is run
 on a separate computer and that you know the IPv4 Address of that computer that runs it
 
